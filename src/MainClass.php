@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ExamplePlugin;
+namespace HyundaiCommmando;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
@@ -12,7 +12,7 @@ use pocketmine\utils\TextFormat;
 class MainClass extends PluginBase{
 
 	public function onLoad() : void{
-		$this->getLogger()->info(TextFormat::WHITE . "I've been loaded!");
+		$this->getLogger()->info(TextFormat::WHITE . "thax u using HYUNDAI COMMANDO V0.0.1 BY ☕️🥛!");
 	}
 
 	public function onEnable() : void{
@@ -27,7 +27,7 @@ class MainClass extends PluginBase{
 
 	public function onCommand(CommandSender $sender, Command $command, string $label, array $args) : bool{
 		switch($command->getName()){
-			case "example":
+			case "commando":
 				$sender->sendMessage("Hello " . $sender->getName() . "!");
 
 				return true;
