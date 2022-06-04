@@ -4,11 +4,18 @@ use CortexPE\Commando\BaseCommand;
 use pocketmine\command\CommandSender;
 
 class HyundaiCommand extends BaseCommand {
+
+private Command $cmd;
+
 	protected function prepare(): void {
-		// This is where we'll register our arguments and subcommands
+$mao=Server::getInstance()->getCommandMap();
+$this->cmd=$mao->get($this->getName());
+$mao->unregister($this->cmd);
+
 	}
 	
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args): void {
-		// This is where the processing will occur if it's NOT handled by other subcommands
+
+$this->cmd->execute($sender, $this->cmd, aliasUsed, $args);
 	}
 }
