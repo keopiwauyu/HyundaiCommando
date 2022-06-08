@@ -37,7 +37,7 @@ class MainClass extends PluginBase{
 	}
 
 	/**
-	 * @var array<string, callable
+	 * @var array<string, callable(string $name, bool $optional, mixed[] $other) : BaseArgument>
 	 */
 	public array $argTypes = [
 		"Boolean" => [BuiltInArgs::class, "booleanArg"],
