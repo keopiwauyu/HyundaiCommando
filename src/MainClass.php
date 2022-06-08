@@ -21,6 +21,22 @@ class MainClass extends PluginBase{
 		$this->getLogger()->info(TextFormat::DARK_GREEN . "I've been enabled!");
 	}
 
+	public function registerCommand(CommandConifg $config) : void {
+		$cmd = new HyundaiCommmando($config->name);
+		$i = 0;
+		foreach ($config->args as $name => $arg) {
+			$type = $arg->type;
+			$factory = $this->argTypes[$type] ?? null;
+			if ($factory === null) throw new OtherConfigException("Unknown arg type: $type");
+			$cmd->registerArgument($i++, $factory($name, $arg->optional, $arg->other));
+		}
+	}
+
+	private function suicide(string $description) : void {
+		$this->getLogger()->critical($description);
+		$this->getServer()->getPluginManager()->disablePlugin($this);
+	}
+
 	public function onDisable() : void{
 		$this->getLogger()->info(TextFormat::DARK_RED . "I've been disabled!");
 	}

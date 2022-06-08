@@ -5,17 +5,24 @@ use pocketmine\command\CommandSender;
 
 class HyundaiCommand extends BaseCommand {
 
-private Command $cmd;
+	private Command $cmd;
+
+	public function __construct(string $name) {
+		$map = Server::getInstance()->getCommandMap();
+		$this->cmd = $map->get($this->getName());
+		$map->unregister($this->cmd);
+
+		parent::__construct($name, $this->cmd->getDescription(), $this->cmd->getAliases());
+		$map->register("TODO", $this);
+	}
 
 	protected function prepare(): void {
-$mao=Server::getInstance()->getCommandMap();
-$this->cmd=$mao->get($this->getName());
-$mao->unregister($this->cmd);
-
+		$perm = $this->cmd->getPermission();
+		if ($perm !== null) $this->setPermission($perm);
 	}
 	
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args): void {
-
-$this->cmd->execute($sender, $this->cmd, aliasUsed, $args);
+		if (!$this->cmd instanceof IRunnable) $args = array_values($args);
+		$this->cmd->execute($sender, $this->cmd, $aliasUsed, $args);
 	}
 }
