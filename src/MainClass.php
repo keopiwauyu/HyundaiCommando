@@ -35,4 +35,18 @@ class MainClass extends PluginBase{
 				throw new \AssertionError("This line will never be executed");
 		}
 	}
+
+	/**
+	 * @var array<string, callable
+	 */
+	public array $argTypes = [
+		"Boolean" => [BuiltInArgs::class, "booleanArg"],
+		"Integer" => [BuiltInArgs::class, "integerArg"],
+		"Float" => [BuiltInArgs::class, "floatArg"],
+		"RawString" => [BuiltInArgs::class, "rawStringArg"],
+		"Text" => [BuiltInArgs::class, "textArg"],
+		"Vector3" => [BuiltInArgs::class, "vector3Arg"],
+		"BlockPosition" => [BuiltInArgs::class, "blockPositionArg"],
+		"StringEnum" => [BuiltInArgs::class, "stringEnumArg"]
+	];
 }
