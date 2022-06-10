@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace keopiwauyu\HyundaiCommando;
 
+use keopiwauyu\HyundaiCommando\RegistrationException;
+
 class BuiltInArgs {
 
 	/**
@@ -57,9 +59,10 @@ class BuiltInArgs {
 
 	/**
 	 * @param mixed[] $other
+	 * @throw RegistrationException
 	 */
 	public static function stringEnumArgument(string $name, bool $optional, array $other) : BaseArgument {
-		foreach ($other as $k => $v) if (!is_scalar($k) || !is_scalar($v)) throw new OtherConfigException("Config for string enum argument should be array<scalar, scalar>");
+		foreach ($other as $k => $v) if (!is_scalar($k) || !is_scalar($v)) throw new RegistrationException("Config for string enum argument should be array<scalar, scalar>");
 		/**
 		 * @phpstan-var array<scalar, scalar> $other
 		 */

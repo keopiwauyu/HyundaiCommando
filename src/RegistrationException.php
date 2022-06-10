@@ -4,5 +4,5 @@ declare(strict_types=1);
 
 namespace keopiwauyu\HyundaiCommando;
 
-final class OtherConfigException extends \Exception {
+final class RegistrationException extends \Exception {
 }

@@ -27,7 +27,7 @@ class MainClass extends PluginBase{
 		foreach ($config->args as $name => $arg) {
 			$type = $arg->type;
 			$factory = $this->argTypes[$type] ?? null;
-			if ($factory === null) throw new OtherConfigException("Unknown arg type: $type");
+			if ($factory === null) throw new RegistrationException("Unknown arg type: $type");
 			$cmd->registerArgument($i++, $factory($name, $arg->optional, $arg->other));
 		}
 	}
