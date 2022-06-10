@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 namespace keopiwauyu\HyundaiCommando;
 
+use CortexPE\Commando\args\BaseArgument;
+use CortexPE\Commando\args\BlockPositionArgument;
+use CortexPE\Commando\args\BooleanArgument;
+use CortexPE\Commando\args\IntegerArgument;
+use CortexPE\Commando\args\TextArgument;
+use CortexPE\Commando\args\Vector3Argument;
 use keopiwauyu\HyundaiCommando\RegistrationException;
 
 class BuiltInArgs {
@@ -12,7 +18,7 @@ class BuiltInArgs {
 	 * @param mixed[] $other
 	 */
 	public static function booleanArg(string $name, bool $optional, array $other) : BaseArgument {
-		return new StringArgument($name, $optional);
+		return new BooleanArgument($name, $optional);
 	}
 
 	/**
@@ -62,11 +68,11 @@ class BuiltInArgs {
 	 * @throw RegistrationException
 	 */
 	public static function stringEnumArgument(string $name, bool $optional, array $other) : BaseArgument {
-		foreach ($other as $k => $v) if (!is_scalar($k) || !is_scalar($v)) throw new RegistrationException("Config for string enum argument should be array<scalar, scalar>");
+		foreach ($other as $v) if (!is_scalar($v)) throw new RegistrationException("Config for string enum argument should be array<int|string, scalar>");
 		/**
 		 * @phpstan-var array<scalar, scalar> $other
 		 */
 		
-		return new StringEnum($name, $optional, $other);
+		return new StringEnum($name, $optional, $other); // TODO
 	}
 }

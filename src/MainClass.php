@@ -16,11 +16,30 @@ use pocketmine\utils\TextFormat;
 
 class MainClass extends PluginBase{
 
+	private static self $instance;
+
+	private static function getInstance() : self
+	{
+		return self::$instance;
+	}
+
 	public function onLoad() : void{
+		self::$instance = $this;
 		$this->getLogger()->info(TextFormat::WHITE . "thax u using HYUNDAI COMMANDO V0.0.1 BY ☕️🥛!");
 	}
 
 	public function onEnable() : void{
+		HyundaiCommand::$sargTypes = [
+		"Boolean" => [BuiltInArgs::class, "booleanArg"],
+		"Integer" => [BuiltInArgs::class, "integerArg"],
+		"Float" => [BuiltInArgs::class, "floatArg"],
+		"RawString" => [BuiltInArgs::class, "rawStringArg"],
+		"Text" => [BuiltInArgs::class, "textArg"],
+		"Vector3" => [BuiltInArgs::class, "vector3Arg"],
+		"BlockPosition" => [BuiltInArgs::class, "blockPositionArg"],
+		"StringEnum" => [BuiltInArgs::class, "stringEnumArg"]
+		];
+
 		$this->getLogger()->info(TextFormat::DARK_GREEN . "I've been enabled!");
 		$this->std = AwaitStd::init($this);
 
@@ -88,27 +107,5 @@ class MainClass extends PluginBase{
 	public AwaitStd $std;
 
 	public function onCommand(CommandSender $sender, Command $command, string $label, array $args) : bool{
-		switch($command->getName()){
-			case "commando":
-				$sender->sendMessage("Hello " . $sender->getName() . "!");
-
-				return true;
-			default:
-				throw new \AssertionError("This line will never be executed");
-		}
 	}
-
-	/**
-	 * @var array<string, callable(string $name, bool $optional, mixed[] $other) : BaseArgument>
-	 */
-	public array $argTypes = [
-		"Boolean" => [BuiltInArgs::class, "booleanArg"],
-		"Integer" => [BuiltInArgs::class, "integerArg"],
-		"Float" => [BuiltInArgs::class, "floatArg"],
-		"RawString" => [BuiltInArgs::class, "rawStringArg"],
-		"Text" => [BuiltInArgs::class, "textArg"],
-		"Vector3" => [BuiltInArgs::class, "vector3Arg"],
-		"BlockPosition" => [BuiltInArgs::class, "blockPositionArg"],
-		"StringEnum" => [BuiltInArgs::class, "stringEnumArg"]
-	];
 }

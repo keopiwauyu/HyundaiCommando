@@ -5,15 +5,12 @@ declare(strict_types=1);
 namespace HyundaiCommando;
 
 use pocketmine\event\Listener;
-use pocketmine\event\player\PlayerChatEvent;
-use pocketmine\event\player\PlayerRespawnEvent;
+use pocketmine\event\server\DataPacketSendEvent;
 
 class ExampleListener implements Listener{
 
-	public function __construct(private MainClass $plugin){ }
-
 	/**
-	 * @param PlayerRespawnEvent $event
+	 * @param DataPacketSendEvent $event
 	 *
 	 * @priority HIGH
 	 */
