@@ -13,7 +13,7 @@ class HyundaiCommand extends BaseCommand {
 		$map->unregister($this->cmd);
 
 		parent::__construct($name, $this->cmd->getDescription(), $this->cmd->getAliases());
-		$map->register("TODO", $this);
+		$map->register($this->getFallbackPrefix(), $this);
 	}
 
 	protected function prepare(): void {
@@ -24,5 +24,10 @@ class HyundaiCommand extends BaseCommand {
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args): void {
 		if (!$this->cmd instanceof IRunnable) $args = array_values($args);
 		$this->cmd->execute($sender, $this->cmd, $aliasUsed, $args);
+	}
+
+	private function getFallbackPrefix() : string {
+		$label = $this->cmd->getLabel();
+		return explode(":", $label)[0];
 	}
 }
