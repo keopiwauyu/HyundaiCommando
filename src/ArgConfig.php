@@ -12,7 +12,7 @@ class ArgConfig {
 	public function __construct(
 		public string $type,
 		public bool $optional,
-		public string $language,
+		public string $name, // TODO: support langusges??
 		public array $other
 	) {
 	}

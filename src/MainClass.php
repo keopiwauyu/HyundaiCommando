@@ -21,14 +21,17 @@ class MainClass extends PluginBase{
 		$this->getLogger()->info(TextFormat::DARK_GREEN . "I've been enabled!");
 	}
 
-	public function registerCommand(CommandConifg $config) : void {
-		$cmd = new HyundaiCommmando($config->name);
-		$i = 0;
-		foreach ($config->args as $name => $arg) {
-			$type = $arg->type;
-			$factory = $this->argTypes[$type] ?? null;
-			if ($factory === null) throw new RegistrationException("Unknown arg type: $type");
-			$cmd->registerArgument($i++, $factory($name, $arg->optional, $arg->other));
+	/**
+	 * Suicide on failure.
+	 * @param ArgConfig[] $args
+	 */
+	public function fromCommand(Command $old, array $args) : HyundaiCommand {
+		try {
+			return new HyundaiCommmando($old, $args);
+		} catch (RegistrationException $err) {
+			$name = $config->name;
+			$this->getLogger()->warning("Error occurred when trying to make this command to hyundai: $name");
+			$this->suicide($err->getMessage());
 		}
 	}
 

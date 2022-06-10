@@ -1,24 +1,36 @@
 <?php
 
 use CortexPE\Commando\BaseCommand;
+use pocketmine\Server;
+use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 
 class HyundaiCommand extends BaseCommand {
 
 	private Command $cmd;
 
-	public function __construct(string $name) {
+	/**
+	 * @param ArgConfig[] $args
+	 */
+	public function __construct(Command $cmd, array $args) {
 		$map = Server::getInstance()->getCommandMap();
-		$this->cmd = $map->get($this->getName());
-		$map->unregister($this->cmd);
+		$perm = $this->cmd->getPermission();
+		if ($perm !== null) $this->setPermission($perm);
 
-		parent::__construct($name, $this->cmd->getDescription(), $this->cmd->getAliases());
+		foreach ($args as $i => $arg) {
+			$type = $arg->type;
+			$factory = $this->argTypes[$type] ?? null;
+			if ($factory === null) throw new RegistrationException("Unknown arg type: $type");
+			$name = $arg->name;
+			$cmd->registerArgument($i++, $factory($name, $arg->optional, $arg->other));
+		}
+
+		parent::__construct($cmd->getName(), $this->cmd->getDescription(), $this->cmd->getAliases());
+		$map->unregister($this->cmd);
 		$map->register($this->getFallbackPrefix(), $this);
 	}
 
 	protected function prepare(): void {
-		$perm = $this->cmd->getPermission();
-		if ($perm !== null) $this->setPermission($perm);
 	}
 	
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args): void {
@@ -29,5 +41,9 @@ class HyundaiCommand extends BaseCommand {
 	private function getFallbackPrefix() : string {
 		$label = $this->cmd->getLabel();
 		return explode(":", $label)[0];
+	}
+
+	public function simpleRegister() : void {
+		$this->register(Server::getInstance()->getCommandMap());
 	}
 }
