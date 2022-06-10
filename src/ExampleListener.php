@@ -18,6 +18,6 @@ class ExampleListener implements Listener{
 	 * @priority HIGH
 	 */
 	public function onDataPacketSendEvent(DataPacketSendEvent $event) : void{
-
+		// TODO: change ugly stirng enum name
 	}
 }
