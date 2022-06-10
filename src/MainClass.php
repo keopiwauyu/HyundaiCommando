@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace HyundaiCommmando;
 
+use SOFe\AwaitGenerator\Await;
+use SOFe\AwaitStd\AwaitStd;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
+use pocketmine\event\EventPriority;
+use pocketmine\event\player\PlayerLoginEvent;
+use pocketmine\event\server\CommandEvent;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;
 
@@ -16,9 +21,44 @@ class MainClass extends PluginBase{
 	}
 
 	public function onEnable() : void{
-		$this->getServer()->getPluginManager()->registerEvents(new ExampleListener($this), $this);
-		$this->getScheduler()->scheduleRepeatingTask(new BroadcastTask($this->getServer()), 120);
 		$this->getLogger()->info(TextFormat::DARK_GREEN . "I've been enabled!");
+		$this->std = AwaitStd::init($this);
+
+		$files = scandir($path = $this->getDataFolder() . "cmds/");
+		foreach ($files ?: [] as $file) {
+			$label = trim($file, ".yml");
+			$args = [];
+
+			foreach (yaml_parse_file($path . $file) as $k => $v) {
+				$args[$k] = ArgConfig::unmarshal($v);
+			}
+			Await::f2c(fn() : \Generator => (yield from $this->fromLabel($name, $args))->simpleRegister() && yield from [])
+		}
+	}
+
+	/**
+	 * Get command from its label and make it hyundai.
+	 * Wait until it gets registered if it is not.
+	 * Suicide on failure.
+	 * @param ArgConfig[] $args
+	 * \Generator<mixed, mixed, mixed, HyundaiCommand>
+	 */
+	public function fromLabel(string $label, array $args) : \Generator {
+		$map = $this->getServer()->getCommandMap();
+		$map->getCommand();
+		while (($cmd = $map->getCommand($label)) === null) {
+			// TODO: Timeout
+			yield from $this->std->awaitEvent(
+				PlayerLoginEvent::class,
+				fn() => true,
+				false,
+				EventPriority::MONITOR,
+				false
+			);
+		}
+		return $this->fromCommand($cmd, $args);
+
+		yield from [];
 	}
 
 	/**
@@ -42,7 +82,10 @@ class MainClass extends PluginBase{
 
 	public function onDisable() : void{
 		$this->getLogger()->info(TextFormat::DARK_RED . "I've been disabled!");
+		unset($this->std);
 	}
+
+	public AwaitStd $std;
 
 	public function onCommand(CommandSender $sender, Command $command, string $label, array $args) : bool{
 		switch($command->getName()){

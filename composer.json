@@ -4,7 +4,10 @@
   "license": "Apache-2.0",
   "require": {
     "pocketmine/pocketmine-mp": "^4",
-    "cortexpe/commando": "dev-master"
+    "cortexpe/commando": "dev-master",
+    "sylvrs/libmarshal": "^1.4",
+    "sof3/await-generator": "^3.4",
+    "sof3/await-std": "dev-master"
   },
   "autoload": {
     "psr-4": {
