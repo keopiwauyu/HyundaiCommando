@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace HyundaiCommmando;
+namespace keopiwauyu\HyundaiCommando;
 
 use SOFe\AwaitGenerator\Await;
 use SOFe\AwaitStd\AwaitStd;
