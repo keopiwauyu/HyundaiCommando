@@ -51,7 +51,16 @@ return new ArgConfig(
 
 	public function testConfigtoArg() : void {
 		HyundaiCommand::resetArgTypes();
-		foreach ([
+		foreach (self::ARG_FACTORY_TO_CLASS as $type => $class) {
+			$arg = HyundaiCommand::configToArg($config = $this->configProviderWithType($type));
+
+			$this->assertSame($arg::class, $class);
+			$this->assertSame($arg->getName(), $config->name);
+			$this->assertSame($arg->isOptional(), $config->optional);
+		}
+	}
+
+	public const ARG_FACTORY_TO_CLASS = [
 			"Boolean" => BooleanArgument::class,
 			"Integer" => IntegerArgument::class,
 			"Float" => FloatArgument::class,
@@ -60,12 +69,5 @@ return new ArgConfig(
 			"Vector3" => Vector3Argument::class,
 			"BlockPosition" => BlockPositionArgument::class
 			// TODO: sitrng enum teste.
-		] as $type => $class) {
-			$arg = HyundaiCommand::configToArg($config = $this->configProviderWithType($type));
-
-			$this->assertSame($arg::class, $class);
-			$this->assertSame($arg->getName(), $config->name);
-			$this->assertSame($arg->isOptional(), $config->optional);
-		}
-	}
+	];
 }

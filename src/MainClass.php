@@ -42,12 +42,10 @@ class MainClass extends PluginBase{
 			$args = [];
 
 $errTemplate = "Error when parsing $path: ";
-			foreach (yaml_parse_file($path . $file) as $k => $v) {
-				if (!is_int($k))  {
-					$this->suicide($errTemplate . "Index $k is not a number");
-					return;
-				}
-
+$data = yaml_parse_file($path . $file);
+ksort($data);
+$data = array_values($data);
+			foreach ($data as $k => $v) {
 				try {
 $config = ArgConfig::unmarshal($v);
 				} catch (GeneralMarshalException|UnmarshalException $err) {

@@ -83,22 +83,20 @@ class BuiltInArgs {
 	
 	/**
 	 * @param mixed[] $other
-	 * @throws RegistrationException Subcommand cannot contain another subcommand. / Argument index is not a number.
+	 * @throws RegistrationException Subcommand cannot contain another subcommand.
 	 */
 	public static function subCommand(string $name, bool $optional, array $other) : BaseSubCommand {
 		try {
-		$config = SubCommandConfig::umarshal($other);
+		$config = SubCommandConfig::unmarshal($other);
 		} catch (GeneralMarshalException|UnmarshalException $err) {
 			throw new RegistrationException("Error when parsing config of subcommand $name: " . $err->getMessage());
 		}
 		$sub = new HyundaiSubCommand($name, $config->description, $config->aliases);
 			$sub->setPermission($config->permission);
 
+		ksort($config->args);
+		$config->args = array_values($config->args);
 		foreach ($config->args as $i => $argConfig) {
-			if (!is_int($i)) {
-				throw new RegistrationException("Index $i is not a number");
-			}
-
 			$arg = HyundaiCommand::configToArg($argConfig);
 			if ($arg instanceof BaseSubCommand) {
 				throw new RegistrationException("Subcommand cannot contain another subcommand");
