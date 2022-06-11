@@ -7,13 +7,18 @@ namespace keopiwauyu\HyundaiCommando;
 use libMarshal\parser\ArrayParseable;
 
 /**
- * @implements ArrayParseable<array<int|string, ArgConfig>>
+ * @template K of array-key
+ * @template V of mixed
+ * @implements ArrayParseable<array<K, ArgConfig>, K, V>
  */
 class ArgConfigParser implements ArrayParseable {
 
 	public function parse(mixed $value) : mixed {
 		$args = [];
 		foreach ($value as $k => $v) {
+			/**
+			 * @var scalar[] $v
+			 */
 $args[$k] =  ArgConfig::unmarshal($v);
 		}
 
@@ -26,6 +31,9 @@ $args[$k] =  ArgConfig::unmarshal($v);
 			$data[$k] = $v->marshal();
 		}
 		
+		/**
+		 * @var array<K, V>
+		 */
 		return $data;
 	}
 }

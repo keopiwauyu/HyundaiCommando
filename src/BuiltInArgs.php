@@ -78,7 +78,7 @@ class BuiltInArgs {
 		 * @phpstan-var array<scalar, scalar> $other
 		 */
 		
-		return new StringEnum($name, $optional, $other); // TODO: string enum.
+		return new StringEnum($name, $optional, $other); // @phpstan-ignore-line TODO: string enum.
 	}
 	
 	/**

@@ -9,6 +9,8 @@ use CortexPE\Commando\args\BaseArgument;
 use pocketmine\Server;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
+use pocketmine\event\EventPriority;
+use pocketmine\event\player\PlayerLoginEvent;
 use pocketmine\math\Vector3;
 
 class HyundaiCommand extends BaseCommand {
@@ -21,12 +23,22 @@ class HyundaiCommand extends BaseCommand {
 		$perm = $this->cmd->getPermission();
 		if ($perm !== null) $this->setPermission($perm); // TODO: ithink 100% require permission in pm4????
 
-		foreach ($args as $arg) {
-			if ($arg instanceof BaseSubCommand) $this->registerSubCommand($arg);
-			else $this->registerArgument($arg);
-		}
+		$args = array_filter($args, function (BaseArgument|BaseSubCommand $arg) : bool {
+			if ($arg instanceof BaseSubCommand) {
+				$this->registerSubCommand($arg);
+				return true; // delete from arrasy.
+			}
 
-		parent::__construct(MainClass::getInstance(), $this->cmd->getName(), $this->cmd->getDescription(), $this->cmd->getAliases());
+			return false;
+		});
+		/**
+		 * @var BaseArgument[] $args
+		 */
+		foreach ($args as $i => $arg) $this->registerArgument($i++, $arg);
+
+		$d = $this->cmd->getDescription();
+		if (!is_string($d)) throw new RegistrationException("Commando only supports pure-string command description");
+		parent::__construct(MainClass::getInstance(), $this->cmd->getName(), $d, $this->cmd->getAliases());
 		$map->unregister($this->cmd);
 		$map->register($this->getFallbackPrefix(), $this);
 	}
@@ -38,17 +50,21 @@ class HyundaiCommand extends BaseCommand {
 		$r = new \ReflectionClass(self::class);
 		$n = $r->newInstanceWithoutConstructor();
 		$perm = $cmd->getPermission();
-		if ($perm !== null) $this->setPermission($perm); // TODO: ithink 100% require permission in pm4????
+		if ($perm !== null) $n->setPermission($perm); // TODO: ithink 100% require permission in pm4????
 		$n->cmd = $cmd;
 
 		if ($registerArgs || $subCommand) {
 		$args =[];
 			foreach (ArgConfigTest::ARG_FACTORY_TO_CLASS as $type => $class) {
-				$args[] = self::$argTypes[$type]("world", true, []);
+				$args[] = self::$argTypes[$type]("world", true, []); // TODO: found bug !!! break my ph untt test
 			}
 		}
 
 		if ($registerArgs) {
+			/**
+			 * @var BaseArgument[] $args
+			 */
+			assert(isset($args));
 			foreach ($args as $i => $arg) {
 				$n->registerArgument($i, $arg);
 			}
@@ -72,13 +88,16 @@ class HyundaiCommand extends BaseCommand {
 	protected function prepare(): void {
 	}
 	
+	/**
+	 * @param mixed[] $args
+	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args): void {
 		var_dump($args);
 		$newArgs = [];
 		foreach ($args as $arg) {
 			$arg = match ( true) {
 				$arg instanceof Vector3 => ($arg->getX() === $arg->getFloorX() && $arg->getY() === $arg->getFloorY() && $arg->getZ() === $arg->getFloorZ()) ? [(string)$arg->getFloorX(), (string)$arg->getFloorY(), (string)$arg->getFloorZ()] : [(string)$arg->getX(), (string)$arg->getY(), (string)$arg->getZ()],
-				!is_string($arg) => [(string)$arg],
+				is_scalar($arg) => [(string)$arg],
 				default => [$arg]
 			};
 			$newArgs[] = implode(" ", $arg);
@@ -98,12 +117,12 @@ class HyundaiCommand extends BaseCommand {
 	/**
 	 * Resets on plugin enable.
 	 * @see MainClass::onEnable()
-	 * @var array<string, callable(string $name, bool $optional, mixed[] $other) : BaseArgument|BaseSubCommand>
+	 * @var array<string, callable(string $name, bool $optional, mixed[] $other) : (BaseArgument|BaseSubCommand)>
 	 */
 	public static array $argTypes;
 
 	public static function resetArgTypes() : void {
-		self::$argTypes = [
+		$types = [
 		"Boolean" => [BuiltInArgs::class, "booleanArg"],
 		"Integer" => [BuiltInArgs::class, "integerArg"],
 		"Float" => [BuiltInArgs::class, "floatArg"],
@@ -114,6 +133,10 @@ class HyundaiCommand extends BaseCommand {
 		"StringEnum" => [BuiltInArgs::class, "stringEnumArg"],
 		"SubCommand" => [BuiltInArgs::class, "subCommand"]
 		];
+		/**
+		 * @var array<string, callable(string $name, bool $optional, mixed[] $other) : (BaseArgument|BaseSubCommand)> $types
+		 */
+		self::$argTypes = $types; 
 	}
 
 	/**
@@ -133,10 +156,10 @@ class HyundaiCommand extends BaseCommand {
 	 * @return \Generator<mixed, mixed, mixed, HyundaiCommand>
 	 */
 	public static function fromLabel(string $label, array $args) : \Generator {
-		$map = $this->getServer()->getCommandMap();
+		$map = Server::getInstance()->getCommandMap();
 		while (($cmd = $map->getCommand($label)) === null) {
 			// TODO: Timeout
-			yield from $this->std->awaitEvent(
+			yield from MainClass::getInstance()->std->awaitEvent(
 				PlayerLoginEvent::class,
 				fn() => true,
 				false,
@@ -144,8 +167,7 @@ class HyundaiCommand extends BaseCommand {
 				false
 			);
 		}
+		assert(isset($cmd));
 		return new self($cmd, $args);
-
-		yield from [];
 	}
 }

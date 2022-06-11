@@ -20,7 +20,7 @@ class MainClass extends PluginBase{
 
 	private static self $instance;
 
-	private static function getInstance() : self
+	public static function getInstance() : self
 	{
 		return self::$instance;
 	}
@@ -37,12 +37,16 @@ class MainClass extends PluginBase{
 
 		$files = scandir($path = $this->getDataFolder() . "cmds/");
 		$generators = [];
-		foreach ($files ?: [] as $file) {
+		foreach ($files !== false ? $files : [] as $file) {
 			$label = trim($file, ".yml");
 			$args = [];
 
 $errTemplate = "Error when parsing $path: ";
 $data = yaml_parse_file($path . $file);
+if (!is_array($data)) {
+	$this->suicide("yaml_parse_file($path" . "$file) result is not array");
+	return;
+}
 ksort($data);
 $data = array_values($data);
 			foreach ($data as $k => $v) {
@@ -61,7 +65,7 @@ $config = ArgConfig::unmarshal($v);
 
 				$args[$k] = $arg;
 			}
-				$generators[] = (fn() : \Generator => ( yield from HyundaiCommand::fromLabel($name, $clone))->simpleRegister())();
+				$generators[] = (fn() : \Generator => ( yield from HyundaiCommand::fromLabel($label, $args))->simpleRegister())();
 		}
 		foreach ($generators as $generator) {
 			Await::g2c($generator);

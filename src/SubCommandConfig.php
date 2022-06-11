@@ -18,7 +18,7 @@ class SubCommandConfig {
 		#[Field] public string $description, // TODO: support langusges??
 		#[Field] public string $permission,
 		#[Field] public array $aliases,
-		#[Field(parser: ArgConfigParser::class)] public array $args
+		#[Field(parser: ArgConfigParser::class)] public array $args // @phpstan-ignore-line
 	) {
 	}
 }

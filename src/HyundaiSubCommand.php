@@ -15,8 +15,14 @@ class HyundaiSubCommand extends BaseSubCommand {
 	protected function prepare(): void {
 	}
 	
+	/**
+	 * @param mixed[] $args
+	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args): void {
 		array_unshift($args, $this->getName());
+		/**
+		 * @var string[] $args phpstan levle 9 sooooooooo bad i us elelev 8 in my nextp lugin
+		 */
 		$this->parent->execute($sender, $aliasUsed, $args);
 	}
 }
