@@ -21,7 +21,7 @@ class HyundaiCommand extends BaseCommand {
 	public function __construct(private Command $cmd, array $args) {
 		$map = Server::getInstance()->getCommandMap();
 		$perm = $this->cmd->getPermission();
-		if ($perm !== null) $this->setPermission($perm); // TODO: ithink 100% require permission in pm4????
+		if ($perm !== null) $this->setPermission($perm);
 
 		$args = array_filter($args, function (BaseArgument|BaseSubCommand $arg) : bool {
 			if ($arg instanceof BaseSubCommand) {
@@ -56,7 +56,7 @@ class HyundaiCommand extends BaseCommand {
 		if ($registerArgs || $subCommand) {
 		$args =[];
 			foreach (ArgConfigTest::ARG_FACTORY_TO_CLASS as $type => $class) {
-				$args[] = self::$argTypes[$type]("world", true, []); // TODO: found bug !!! break my ph untt test
+				$args[] = self::$argTypes[$type]($type, true, []); // TODO: found bug !!! break my ph untt test
 			}
 		}
 
@@ -92,15 +92,15 @@ class HyundaiCommand extends BaseCommand {
 	 * @param mixed[] $args
 	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args): void {
-		var_dump($args);
 		$newArgs = [];
 		foreach ($args as $arg) {
-			$arg = match ( true) {
+			$newArgs = array_merge($newArgs, match ( true) {
+				$arg => ["true"], // TODO: on / off enum blah bla blah
+				!$arg => ["false"],
 				$arg instanceof Vector3 => ($arg->getX() === $arg->getFloorX() && $arg->getY() === $arg->getFloorY() && $arg->getZ() === $arg->getFloorZ()) ? [(string)$arg->getFloorX(), (string)$arg->getFloorY(), (string)$arg->getFloorZ()] : [(string)$arg->getX(), (string)$arg->getY(), (string)$arg->getZ()],
 				is_scalar($arg) => [(string)$arg],
 				default => [$arg]
-			};
-			$newArgs[] = implode(" ", $arg);
+			});
 		}
 		$this->cmd->execute($sender, $aliasUsed, $newArgs);
 	}

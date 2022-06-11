@@ -18,7 +18,7 @@ class HyundaiCommandTest extends TestCase {
 		$this->assertSame($update, []);
 	}
 
-/*	public function testExecuteRegisterArgs() : void {
+	public function testExecuteRegisterArgs() : void {
 		HyundaiCommand::resetArgTypes();
 		$update = [];
 		$cmd = HyundaiCommand::createForTesting(UpdateArrayOnExecute::make($update), true, false);
@@ -26,6 +26,7 @@ class HyundaiCommandTest extends TestCase {
 		// $args = ["true", "3", "1.4587742654465", "world", "INF", "NAN", "-INF", "100", "200", "300", "https://youtu.be/Bc8vc8Y_AYw"]; // BRUH INF NAN sicentific notiatioN no aupported
 		$args = ["true", "3", "1.4587742654465", "world", "-1.4587742654465", ".0", "-.0", "100", "200", "300", "https://youtu.be/Bc8vc8Y_AYw"]; // TODO: test ~~~ in intragrated tesst
 		$cmd->execute(new FakeCommandSender(), "hello", $args);
+		$args[5] = $args[6] = "0";
 		$this->assertSame($update, $args);
-	} TODO: do it integrated tst
-*/}
+	}
+}

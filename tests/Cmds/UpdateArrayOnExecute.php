@@ -17,7 +17,7 @@ class UpdateArrayOnExecute extends Command {
 			"dd",
 			"ee"
 		]);
-		$n->updater = function(array $args) use ($update) : void {
+		$n->updater = function(array $args) use (&$update) : void {
 			$update = $args;
 		};
 
