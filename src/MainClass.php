@@ -31,18 +31,7 @@ class MainClass extends PluginBase{
 	}
 
 	public function onEnable() : void{
-		HyundaiCommand::$sargTypes = [
-		"Boolean" => [BuiltInArgs::class, "booleanArg"],
-		"Integer" => [BuiltInArgs::class, "integerArg"],
-		"Float" => [BuiltInArgs::class, "floatArg"],
-		"RawString" => [BuiltInArgs::class, "rawStringArg"],
-		"Text" => [BuiltInArgs::class, "textArg"],
-		"Vector3" => [BuiltInArgs::class, "vector3Arg"],
-		"BlockPosition" => [BuiltInArgs::class, "blockPositionArg"],
-		"StringEnum" => [BuiltInArgs::class, "stringEnumArg"],
-		"SubCommand" => [BuiltInArgs::class, "subCommand"]
-		];
-
+		HyundaiCommand::resetArgTypes();
 		$this->getLogger()->info(TextFormat::DARK_GREEN . "I've been enabled!");
 		$this->std = AwaitStd::init($this);
 

@@ -15,7 +15,7 @@ class HyundaiCommand extends BaseCommand {
 	/**
 	 * @param array<int, BaseArgument|BaseSubCommand> $args
 	 */
-	public function __construct(private Command $this->cmd, array $args) {
+	public function __construct(private Command $cmd, array $args) {
 		$map = Server::getInstance()->getCommandMap();
 		$perm = $this->cmd->getPermission();
 		if ($perm !== null) $this->setPermission($perm);
@@ -53,10 +53,24 @@ class HyundaiCommand extends BaseCommand {
 	 */
 	public static array $argTypes;
 
+	public static function resetArgTypes() : void {
+		self::$argTypes = [
+		"Boolean" => [BuiltInArgs::class, "booleanArg"],
+		"Integer" => [BuiltInArgs::class, "integerArg"],
+		"Float" => [BuiltInArgs::class, "floatArg"],
+		"RawString" => [BuiltInArgs::class, "rawStringArg"],
+		"Text" => [BuiltInArgs::class, "textArg"],
+		"Vector3" => [BuiltInArgs::class, "vector3Arg"],
+		"BlockPosition" => [BuiltInArgs::class, "blockPositionArg"],
+		"StringEnum" => [BuiltInArgs::class, "stringEnumArg"],
+		"SubCommand" => [BuiltInArgs::class, "subCommand"]
+		];
+	}
+
 	/**
 	 * @throwss RegistrationException
 	 */
-	public static function configToArg(ArgConfig $config) : array {
+	public static function configToArg(ArgConfig $config) : BaseArgument|BaseSubCommand {
 			$type = $config->type;
 			$factory = self::$argTypes[$type] ?? throw new RegistrationException("Unknown arg type: $type");
 			$name = $config->name;

@@ -8,7 +8,9 @@ use CortexPE\Commando\BaseSubCommand;
 use CortexPE\Commando\args\BaseArgument;
 use CortexPE\Commando\args\BlockPositionArgument;
 use CortexPE\Commando\args\BooleanArgument;
+use CortexPE\Commando\args\FloatArgument;
 use CortexPE\Commando\args\IntegerArgument;
+use CortexPE\Commando\args\RawStringArgument;
 use CortexPE\Commando\args\TextArgument;
 use CortexPE\Commando\args\Vector3Argument;
 use keopiwauyu\HyundaiCommando\RegistrationException;
@@ -48,7 +50,7 @@ class BuiltInArgs {
 	/**
 	 * @param mixed[] $other
 	 */
-	public static function textArgument(string $name, bool $optional, array $other) : BaseArgument {
+	public static function textArg(string $name, bool $optional, array $other) : BaseArgument {
 		return new TextArgument($name, $optional);
 	}
 
@@ -76,7 +78,7 @@ class BuiltInArgs {
 		 * @phpstan-var array<scalar, scalar> $other
 		 */
 		
-		return new StringEnum($name, $optional, $other); // TODO
+		return new StringEnum($name, $optional, $other); // TODO: string enum.
 	}
 	
 	/**

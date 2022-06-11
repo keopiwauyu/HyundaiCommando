@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace HyundaiCommando;
+namespace keopiwauyu\HyundaiCommando;
 
 use pocketmine\event\Listener;
 use pocketmine\event\server\DataPacketSendEvent;
