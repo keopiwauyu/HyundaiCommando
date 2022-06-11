@@ -65,9 +65,9 @@ return new ArgConfig(
 			"Integer" => IntegerArgument::class,
 			"Float" => FloatArgument::class,
 			"RawString" => RawStringArgument::class,
-			"Text" => TextArgument::class,
 			"Vector3" => Vector3Argument::class,
-			"BlockPosition" => BlockPositionArgument::class
+			"BlockPosition" => BlockPositionArgument::class,
+			"Text" => TextArgument::class // ENEED TO PUT BEHIND ALL THINGS BECAUSE AERROR!!!!
 			// TODO: sitrng enum teste.
 	];
 }

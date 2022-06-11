@@ -9,6 +9,7 @@ use CortexPE\Commando\args\BaseArgument;
 use pocketmine\Server;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
+use pocketmine\math\Vector3;
 
 class HyundaiCommand extends BaseCommand {
 
@@ -18,7 +19,7 @@ class HyundaiCommand extends BaseCommand {
 	public function __construct(private Command $cmd, array $args) {
 		$map = Server::getInstance()->getCommandMap();
 		$perm = $this->cmd->getPermission();
-		if ($perm !== null) $this->setPermission($perm);
+		if ($perm !== null) $this->setPermission($perm); // TODO: ithink 100% require permission in pm4????
 
 		foreach ($args as $arg) {
 			if ($arg instanceof BaseSubCommand) $this->registerSubCommand($arg);
@@ -30,11 +31,59 @@ class HyundaiCommand extends BaseCommand {
 		$map->register($this->getFallbackPrefix(), $this);
 	}
 
+	/**
+	 * @internal DO NOT CALL FUNCTION NO TAPI !!!!!!!!!!!!!!!!
+	 */
+	public static function createForTesting(Command $cmd, bool $registerArgs, bool $subCommand) : self {
+		$r = new \ReflectionClass(self::class);
+		$n = $r->newInstanceWithoutConstructor();
+		$perm = $cmd->getPermission();
+		if ($perm !== null) $this->setPermission($perm); // TODO: ithink 100% require permission in pm4????
+		$n->cmd = $cmd;
+
+		if ($registerArgs || $subCommand) {
+		$args =[];
+			foreach (ArgConfigTest::ARG_FACTORY_TO_CLASS as $type => $class) {
+				$args[] = self::$argTypes[$type]("world", true, []);
+			}
+		}
+
+		if ($registerArgs) {
+			foreach ($args as $i => $arg) {
+				$n->registerArgument($i, $arg);
+			}
+		}
+		if ($subCommand) {
+			$sub = new HyundaiSubCommand("aaa", "bbb", [
+				"ccc",
+				"ddd"
+			]);
+			if ($registerArgs) {
+				foreach ($args as $i => $arg) {
+				$sub->registerArgument($i, $arg);
+				}
+			}
+			$n->registerSubCommand($sub);
+		}
+
+		return $n;
+	}
+
 	protected function prepare(): void {
 	}
 	
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args): void {
-		$this->cmd->execute($sender, $aliasUsed, array_values($args));
+		var_dump($args);
+		$newArgs = [];
+		foreach ($args as $arg) {
+			$arg = match ( true) {
+				$arg instanceof Vector3 => ($arg->getX() === $arg->getFloorX() && $arg->getY() === $arg->getFloorY() && $arg->getZ() === $arg->getFloorZ()) ? [(string)$arg->getFloorX(), (string)$arg->getFloorY(), (string)$arg->getFloorZ()] : [(string)$arg->getX(), (string)$arg->getY(), (string)$arg->getZ()],
+				!is_string($arg) => [(string)$arg],
+				default => [$arg]
+			};
+			$newArgs[] = implode(" ", $arg);
+		}
+		$this->cmd->execute($sender, $aliasUsed, $newArgs);
 	}
 
 	private function getFallbackPrefix() : string {
