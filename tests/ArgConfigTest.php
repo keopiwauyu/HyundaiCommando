@@ -17,9 +17,9 @@ class ArgConfigTest extends TestCase {
 
 	public function testUnmarshal() : void {
 		$data = [
-			"type" => "홍콩을 해방하다",
+			"type" => "hello",
 			"optional" => true,
-			"name" => "우리 시대의 혁명",
+			"name" => "world",
 			"other" => []
 		];
 
@@ -29,9 +29,9 @@ class ArgConfigTest extends TestCase {
 
 	private function configProvider() : ArgConfig {
 return new ArgConfig(
-			type: "홍콩을 해방하다",
+			type: "hello",
 			optional: true,
-			name: "우리 시대의 혁명",
+			name: "world",
 			other: []
 		);
 	}
