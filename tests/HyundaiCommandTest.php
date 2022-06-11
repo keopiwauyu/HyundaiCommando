@@ -10,11 +10,6 @@ use keopiwauyu\HyundaiCommando\Cmds\UpdateArrayOnExecute;
 use pocketmine\math\Vector3;
 
 class HyundaiCommandTest extends TestCase {
-	private function commandProvider(array &$update) : HyundaiCommand {
-		$cmd = UpdateArrayOnExecute::make($update);
-		return HyundaiCommand::createForTesting($cmd);
-	}
-
 	public function testExecute() : void {
 		HyundaiCommand::resetArgTypes();
 		$update = [];
