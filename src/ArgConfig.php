@@ -6,8 +6,12 @@ namespace keopiwauyu\HyundaiCommando;
 
 use libMarshal\MarshalTrait;
 use libMarshal\attributes\Field;
+use libMarshal\parser\ArrayParseable;
 
-class ArgConfig {
+/**
+ * @implements ArrayParseable<self>
+ */
+class ArgConfig implements ArrayParseable {
 	use MarshalTrait;
 
 	/**
@@ -19,5 +23,13 @@ class ArgConfig {
 		#[Field] public string $name, // TODO: support langusges??
 		#[Field] public array $other
 	) {
+	}
+
+	public function parse(mixed $value) : mixed {
+		return self::unmarshal($value);
+	}
+
+	public function serialize(mixed $value) : array {
+		return $value;
 	}
 }

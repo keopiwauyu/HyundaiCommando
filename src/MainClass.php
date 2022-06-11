@@ -6,6 +6,8 @@ namespace HyundaiCommmando;
 
 use SOFe\AwaitGenerator\Await;
 use SOFe\AwaitStd\AwaitStd;
+use libMarshal\exception\GeneralMarshalException;
+use libMarshal\exception\UnmarshalException;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\event\EventPriority;
@@ -37,60 +39,45 @@ class MainClass extends PluginBase{
 		"Text" => [BuiltInArgs::class, "textArg"],
 		"Vector3" => [BuiltInArgs::class, "vector3Arg"],
 		"BlockPosition" => [BuiltInArgs::class, "blockPositionArg"],
-		"StringEnum" => [BuiltInArgs::class, "stringEnumArg"]
+		"StringEnum" => [BuiltInArgs::class, "stringEnumArg"],
+		"SubCommand" => [BuiltInArgs::class, "subCommand"]
 		];
 
 		$this->getLogger()->info(TextFormat::DARK_GREEN . "I've been enabled!");
 		$this->std = AwaitStd::init($this);
 
 		$files = scandir($path = $this->getDataFolder() . "cmds/");
+		$generators = [];
 		foreach ($files ?: [] as $file) {
 			$label = trim($file, ".yml");
 			$args = [];
 
+$errTemplate = "Error when parsing $path: ";
 			foreach (yaml_parse_file($path . $file) as $k => $v) {
-				$args[$k] = ArgConfig::unmarshal($v);
+				if (!is_int($k))  {
+					$this->suicide($errTemplate . "Index $k is not a number");
+					return;
+				}
+
+				try {
+$config = ArgConfig::unmarshal($v);
+				} catch (GeneralMarshalException|UnmarshalException $err) {
+					$this->suicide($errTemplate . $err->getMessage());
+					return;
+				}
+				try {
+					$arg = HyundaiCommand::configToArg($config);
+				} catch (RegistrationException $err) {
+					$this->suicide("Error when parsing argument $k in command $label: ". $err->getMessage());
+					return;
+				}
+
+				$args[$k] = $arg;
 			}
-			Await::f2c(fn() : \Generator => (yield from $this->fromLabel($name, $args))->simpleRegister() && yield from [])
+				$generators[] = (fn() : \Generator => ( yield from HyundaiCommand::fromLabel($name, $clone))->simpleRegister())();
 		}
-	}
-
-	/**
-	 * Get command from its label and make it hyundai.
-	 * Wait until it gets registered if it is not.
-	 * Suicide on failure.
-	 * @param ArgConfig[] $args
-	 * \Generator<mixed, mixed, mixed, HyundaiCommand>
-	 */
-	public function fromLabel(string $label, array $args) : \Generator {
-		$map = $this->getServer()->getCommandMap();
-		$map->getCommand();
-		while (($cmd = $map->getCommand($label)) === null) {
-			// TODO: Timeout
-			yield from $this->std->awaitEvent(
-				PlayerLoginEvent::class,
-				fn() => true,
-				false,
-				EventPriority::MONITOR,
-				false
-			);
-		}
-		return $this->fromCommand($cmd, $args);
-
-		yield from [];
-	}
-
-	/**
-	 * Suicide on failure.
-	 * @param ArgConfig[] $args
-	 */
-	public function fromCommand(Command $old, array $args) : HyundaiCommand {
-		try {
-			return new HyundaiCommmando($old, $args);
-		} catch (RegistrationException $err) {
-			$name = $config->name;
-			$this->getLogger()->warning("Error occurred when trying to make this command to hyundai: $name");
-			$this->suicide($err->getMessage());
+		foreach ($generators as $generator) {
+			Await::g2c($generator);
 		}
 	}
 
