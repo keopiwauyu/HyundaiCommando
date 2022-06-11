@@ -23,6 +23,6 @@ class HyundaiSubCommand extends BaseSubCommand {
 		/**
 		 * @var string[] $args phpstan levle 9 sooooooooo bad i us elelev 8 in my nextp lugin
 		 */
-		$this->parent->execute($sender, $aliasUsed, $args);
+		$this->parent->onRun($sender, $aliasUsed, $args);
 	}
 }
