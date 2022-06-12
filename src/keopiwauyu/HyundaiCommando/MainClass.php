@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace keopiwauyu\HyundaiCommando;
 
+use CortexPE\Commando\PacketHooker;
 use SOFe\AwaitGenerator\Await;
 use SOFe\AwaitStd\AwaitStd;
 use libMarshal\exception\GeneralMarshalException;
@@ -13,6 +14,7 @@ use pocketmine\command\CommandSender;
 use pocketmine\event\EventPriority;
 use pocketmine\event\player\PlayerLoginEvent;
 use pocketmine\event\server\CommandEvent;
+use pocketmine\network\mcpe\handler\PacketHandler;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;
 
@@ -76,6 +78,8 @@ $config = ArgConfig::unmarshal($v);
 		foreach ($generators as $generator) {
 			Await::g2c($generator); // @phpstan-ignore-line
 		}
+
+		if (!PacketHooker::isRegistered()) PacketHooker::register();
 	}
 
 	private function suicide(string $description) : void {
