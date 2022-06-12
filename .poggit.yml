@@ -1,0 +1,18 @@
+--- # Poggit-CI Manifest. Open the CI at https://poggit.pmmp.io/ci/keopiwauyu/HyundaiCommando
+build-by-default: true
+branches:
+- poggit
+projects:
+  HyundaiCommando:
+    path: ""
+    libs:
+      - src: SOF3/await-generator/await-generator
+        version: ^3.4.0
+      - src: SOF3/await-std/await-std
+        verison: ^0.2.0
+      - src: sylvrs/libMarshal/libMarshal
+        version: ^1.4.0
+        branch: feature/virion
+      - src: keopiwauyu/Commando/Commando
+        version: ^3.1.0
+...
