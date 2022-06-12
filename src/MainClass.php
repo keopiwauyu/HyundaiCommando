@@ -66,11 +66,11 @@ $config = ArgConfig::unmarshal($v);
 				$args[$k] = $arg;
 			}
 			$this->getLogger()->debug("Queued command registration for '$label'");
-			$generators[] = function() use ($label, $args) : \Generator {
+			$generators[] = (function() use ($label, $args) : \Generator {
 				$cmd = yield from HyundaiCommand::fromLabel($label, $args);
 				$cmd->simpleRegister();
 				$this->getLogger()->debug("Registered '$label'");
-			}();
+			})();
 			}
 		}
 		foreach ($generators as $generator) {
