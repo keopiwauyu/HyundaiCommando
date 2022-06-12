@@ -13,6 +13,7 @@ use CortexPE\Commando\args\IntegerArgument;
 use CortexPE\Commando\args\RawStringArgument;
 use CortexPE\Commando\args\TextArgument;
 use CortexPE\Commando\args\Vector3Argument;
+use CortexPE\Commando\exception\ArgumentOrderException;
 use keopiwauyu\HyundaiCommando\RegistrationException;
 use libMarshal\exception\GeneralMarshalException;
 use libMarshal\exception\UnmarshalException;
@@ -99,9 +100,13 @@ class BuiltInArgs {
 		foreach ($config->args as $i => $argConfig) {
 			$arg = HyundaiCommand::configToArg($argConfig);
 			if ($arg instanceof BaseSubCommand) {
-				throw new RegistrationException("Subcommand cannot contain another subcommand");
+				throw new RegistrationException("Subcommand $name cannot contain another subcommand");
 			}
-			$sub->registerArgument($i, $arg);
+			try {
+$sub->registerArgument($i, $arg);
+			} catch (ArgumentOrderException $err) {
+				throw new RegistrationException("Bad argument order for subcommand $name: " . $err->getMessage());
+			}
 		}
 
 		return $sub;

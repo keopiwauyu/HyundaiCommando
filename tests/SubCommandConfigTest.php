@@ -114,6 +114,12 @@ return [
 		}
 	}
 
-	// TODO: Optional arg after noraml raarg
-	// TODO: bad arg order like 0, 1 , 50, 390159240897
+	public function testConfigToArgNormalArgAfterOptionalArg() : void {
+		$data = $this->dataProvider();
+		$data["args"][0] = ["type" => "Boolean", "name" => "자유는 다시 오길", "optional" => true, "other" => []];
+		$data["args"][1] = ["type" => "Boolean", "name" => "총알 눈앞에 지나가", "optional" => false, "other" => []];
+
+		$this->expectException(RegistrationException::class);
+		HyundaiCommand::configToArg(ArgConfig::unmarshal($this->wrapWithArgConfigData($data)));
+	}
 }
