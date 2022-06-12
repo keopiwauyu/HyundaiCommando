@@ -11,6 +11,7 @@ use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\event\EventPriority;
 use pocketmine\event\player\PlayerLoginEvent;
+use pocketmine\lang\Translatable;
 use pocketmine\math\Vector3;
 
 class HyundaiCommand extends BaseCommand {
@@ -37,7 +38,10 @@ class HyundaiCommand extends BaseCommand {
 		foreach ($args as $i => $arg) $this->registerArgument($i++, $arg);
 
 		$d = $this->cmd->getDescription();
-		if (!is_string($d)) throw new RegistrationException("Commando only supports pure-string command description");
+		if ($d instanceof Translatable) {
+			$d = $d->getText();
+			MainClass::getInstance()->getLogger()->warning("Commando only supports pure-string description, so the description of '" . $this->cmd->getName() . "' is changed to: $d");
+		}
 		parent::__construct(MainClass::getInstance(), $this->cmd->getName(), $d, $this->cmd->getAliases());
 		$map->unregister($this->cmd);
 		$map->register($this->getFallbackPrefix(), $this);
@@ -144,7 +148,8 @@ class HyundaiCommand extends BaseCommand {
 	 */
 	public static function configToArg(ArgConfig $config) : BaseArgument|BaseSubCommand {
 			$type = $config->type;
-			$factory = self::$argTypes[$type] ?? throw new RegistrationException("Unknown arg type: $type");
+			$name = $config->name;
+			$factory = self::$argTypes[$type] ?? throw new RegistrationException("Arg '$name' has unknown type: $type");
 			$name = $config->name;
 			 return $factory($name, $config->optional, $config->other);
 	}

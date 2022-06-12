@@ -74,7 +74,7 @@ class BuiltInArgs {
 	 * @throws RegistrationException
 	 */
 	public static function stringEnumArgument(string $name, bool $optional, array $other) : BaseArgument {
-		foreach ($other as $v) if (!is_scalar($v)) throw new RegistrationException("Config for string enum argument should be array<int|string, scalar>");
+		foreach ($other as $v) if (!is_scalar($v)) throw new RegistrationException("Other config of string enum arg '$name' is not array<int|string, scalar>");
 		/**
 		 * @phpstan-var array<scalar, scalar> $other
 		 */
@@ -90,7 +90,7 @@ class BuiltInArgs {
 		try {
 		$config = SubCommandConfig::unmarshal($other);
 		} catch (GeneralMarshalException|UnmarshalException $err) {
-			throw new RegistrationException("Error when parsing config of subcommand $name: " . $err->getMessage());
+			throw new RegistrationException("Error when parsing config of subcommand '$name': " . $err->getMessage());
 		}
 		$sub = new HyundaiSubCommand($name, $config->description, $config->aliases);
 			$sub->setPermission($config->permission);
@@ -100,12 +100,12 @@ class BuiltInArgs {
 		foreach ($config->args as $i => $argConfig) {
 			$arg = HyundaiCommand::configToArg($argConfig);
 			if ($arg instanceof BaseSubCommand) {
-				throw new RegistrationException("Subcommand $name cannot contain another subcommand");
+				throw new RegistrationException("Subcommand '$name' cannot contain another subcommand");
 			}
 			try {
 $sub->registerArgument($i, $arg);
 			} catch (ArgumentOrderException $err) {
-				throw new RegistrationException("Bad argument order for subcommand $name: " . $err->getMessage());
+				throw new RegistrationException("Bad argument order for subcommand '$name': " . $err->getMessage());
 			}
 		}
 
