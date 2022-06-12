@@ -38,7 +38,7 @@ class MainClass extends PluginBase{
 		@mkdir($path = $this->getDataFolder() . "cmds/");
 		$files = scandir($path);
 		$generators = [];
-		foreach ($files !== false ? $files : [] as $file) {
+		foreach (array_diff($files !== false ? $files : [], [".", ".."]) as $file) {
 			$label = str_replace(" ", ":", trim($file, ".yml"));
 			$args = [];
 
