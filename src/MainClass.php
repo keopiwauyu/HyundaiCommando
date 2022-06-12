@@ -71,10 +71,9 @@ $config = ArgConfig::unmarshal($v);
 				$cmd->simpleRegister();
 				$this->getLogger()->debug("Registered '$label'");
 			})();
-			}
 		}
 		foreach ($generators as $generator) {
-			Await::g2c($generator);
+			Await::g2c($generator); // @phpstan-ignore-line
 		}
 	}
 
