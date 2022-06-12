@@ -35,7 +35,8 @@ class MainClass extends PluginBase{
 		$this->getLogger()->info(TextFormat::DARK_GREEN . "I've been enabled!");
 		$this->std = AwaitStd::init($this);
 
-		$files = scandir($path = $this->getDataFolder() . "cmds/");
+		@mkdir($path = $this->getDataFolder() . "cmds/");
+		$files = scandir($path);
 		$generators = [];
 		foreach ($files !== false ? $files : [] as $file) {
 			$label = str_replace(" ", ":", trim($file, ".yml"));
