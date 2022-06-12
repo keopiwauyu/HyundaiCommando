@@ -27,10 +27,10 @@ class HyundaiCommand extends BaseCommand {
 		$args = array_filter($args, function (BaseArgument|BaseSubCommand $arg) : bool {
 			if ($arg instanceof BaseSubCommand) {
 				$this->registerSubCommand($arg);
-				return true; // delete from arrasy.
+				return false; // delete from arrasy.
 			}
 
-			return false;
+			return true;
 		});
 		/**
 		 * @var BaseArgument[] $args
