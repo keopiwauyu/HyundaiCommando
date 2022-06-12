@@ -38,7 +38,7 @@ class MainClass extends PluginBase{
 		$files = scandir($path = $this->getDataFolder() . "cmds/");
 		$generators = [];
 		foreach ($files !== false ? $files : [] as $file) {
-			$label = trim($file, ".yml");
+			$label = str_replace(" ", ":", trim($file, ".yml"));
 			$args = [];
 
 $errTemplate = "Error when parsing $path: ";
@@ -65,7 +65,8 @@ $config = ArgConfig::unmarshal($v);
 
 				$args[$k] = $arg;
 			}
-				$generators[] = (fn() : \Generator => ( yield from HyundaiCommand::fromLabel($label, $args))->simpleRegister())();
+			$this->getLogger()->debug("Queued command registration for '$label'");
+				$generators[] = (fn() : \Generator => ( yield from HyundaiCommand::fromLabel($label, $args))->simpleRegister() && $this->getLogger()->debug("Registered '$label'"))();
 		}
 		foreach ($generators as $generator) {
 			Await::g2c($generator);
