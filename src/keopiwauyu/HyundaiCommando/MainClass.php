@@ -79,7 +79,7 @@ $config = ArgConfig::unmarshal($v);
 			Await::g2c($generator); // @phpstan-ignore-line
 		}
 
-		if (!PacketHooker::isRegistered()) PacketHooker::register();
+		if (!PacketHooker::isRegistered()) PacketHooker::register($this);
 	}
 
 	private function suicide(string $description) : void {
