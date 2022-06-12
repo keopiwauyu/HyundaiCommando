@@ -66,7 +66,12 @@ $config = ArgConfig::unmarshal($v);
 				$args[$k] = $arg;
 			}
 			$this->getLogger()->debug("Queued command registration for '$label'");
-				$generators[] = (fn() : \Generator => ( yield from HyundaiCommand::fromLabel($label, $args))->simpleRegister() && $this->getLogger()->debug("Registered '$label'"))();
+			$generators[] = function() use ($label, $args) : \Generator {
+				$cmd = yield from HyundaiCommand::fromLabel($label, $args);
+				$cmd->simpleRegister();
+				$this->getLogger()->debug("Registered '$label'");
+			}();
+			}
 		}
 		foreach ($generators as $generator) {
 			Await::g2c($generator);
@@ -86,5 +91,7 @@ $config = ArgConfig::unmarshal($v);
 	public AwaitStd $std;
 
 	public function onCommand(CommandSender $sender, Command $command, string $label, array $args) : bool{
+		$sender->sendMessage("COMMING SOON!!!!");
+		return true;
 	}
 }

@@ -99,13 +99,15 @@ class HyundaiCommand extends BaseCommand {
 		$newArgs = [];
 		foreach ($args as $arg) {
 			$newArgs = array_merge($newArgs, match ( true) {
-				$arg => ["true"], // TODO: on / off enum blah bla blah
-				!$arg => ["false"],
+is_bool($arg)=> [$arg ? "true" : "false"], // TODO: on / off enum blah bla blah
 				$arg instanceof Vector3 => ($arg->getX() === $arg->getFloorX() && $arg->getY() === $arg->getFloorY() && $arg->getZ() === $arg->getFloorZ()) ? [(string)$arg->getFloorX(), (string)$arg->getFloorY(), (string)$arg->getFloorZ()] : [(string)$arg->getX(), (string)$arg->getY(), (string)$arg->getZ()],
 				is_scalar($arg) => [(string)$arg],
 				default => [$arg]
 			});
 		}
+		/**
+		 * @var string[] $newArgs
+		 */
 		$this->cmd->execute($sender, $aliasUsed, $newArgs);
 	}
 
