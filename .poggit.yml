@@ -2,6 +2,7 @@
 build-by-default: true
 branches:
 - poggit
+- src-namespace-prefix-broken
 projects:
   HyundaiCommando:
     path: ""
