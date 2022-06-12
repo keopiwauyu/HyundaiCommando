@@ -1,7 +1,7 @@
 #name, main, version and api are required
 name: HyundaiCommando
-main: HyundaiCommando\MainClass
-src-namespace-prefix: HyundaiCommando
+main: keopiwauyu\HyundaiCommando\MainClass
+src-namespace-prefix: keopiwauyu\HyundaiCommando
 version: 0.0.1
 api: 4.0.0
 
