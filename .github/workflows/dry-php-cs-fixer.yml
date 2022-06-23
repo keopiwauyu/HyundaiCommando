@@ -7,23 +7,16 @@ on:
 
 name: PHP Code Standard Fixer (Dry Run)
 jobs:
-  protect-config:
-    name: Prevent file change
-    # You may pin to the exact commit or the version.
-    # uses: xalvarez/prevent-file-change-action@2218384e1920b05e9db3d59bcf2427814f4d771c
-    uses: xalvarez/prevent-file-change-action@v1.2.0
-    with:
-      # GitHub token
-      githubToken: ${{ secrets.GITHUB_TOKEN }}
-      # JavaScript regular expression matching filenames (including path) of files which must not be changed
-      pattern: .php-cs-fixer.php
-      # Always trust pull request authors included in this comma separated list, e.g.: user1, user2, user3
-      # trustedAuthors: # optional
   php-cs-fixer:
     name: PHP-CS-Fixer
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - uses: xalvarez/prevent-file-change-action@v1.2.0
+      with:
+        # githubToken: ${{ secrets.GITHUB_TOKEN }}
+        pattern: .php-cs-fixer.php
+        # trustedAuthors: # optional
     - name: PHP-CS-Fixer
       uses: docker://oskarstark/php-cs-fixer-ga
       with:
