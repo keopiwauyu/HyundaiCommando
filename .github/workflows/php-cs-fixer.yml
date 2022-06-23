@@ -1,17 +1,29 @@
-# .github/workflows/lint.yml
+on: [pull_request, workflow_dispatch]
+name: Create PRs for php-cs-fixer fixups
 
-on:
-#  push:
-  pull_request:
-  workflow_dispatch:
-name: PHP Code Standard Fixer
 jobs:
-  php-cs-fixer:
-    name: PHP-CS-Fixer
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: PHP-CS-Fixer
-      uses: docker://oskarstark/php-cs-fixer-ga
-      with:
-        args: --config=.php-cs-fixer.php --diff --dry-run
+    fix-cs:
+        name: Fix CS violations
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: docker://oskarstark/php-cs-fixer-ga:latest
+            - uses: peter-evans/create-pull-request@v2
+              id: cpr
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  commit-message: Apply php-cs-fixer changes as of ${{ github.sha }}
+                  title: Fix coding standards in ${{ github.ref }}
+                  branch: php-cs-fixer/${{ github.ref }}
+                  assignees: ${{ github.actor }}
+                  body: |
+                    Please apply these changes on the ${{ github.ref }} branch to fix coding standard violations.
+
+            - uses: unsplash/comment-on-pr@v1.2.0
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              if: steps.cpr.outputs.pr_number
+              continue-on-error: true # Will fail if not on PR
+              with:
+                  msg: |
+                    @${{ github.actor }} please apply the coding standard fixes from #${{ steps.cpr.outputs.pr_number }}
