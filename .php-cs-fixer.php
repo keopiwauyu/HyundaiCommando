@@ -6,7 +6,8 @@ use PhpCsFixer\Finder;
 return (function() {
     $finder = Finder::create();
     $dir = __DIR__ . "/";
-    $project = basename($dir);
+    //$project = basename($dir);
+    $project = "";
     foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir . $project . "/src")) as $file) {
         $file = realpath($file);
         if(substr($file, -4) === ".php") {
