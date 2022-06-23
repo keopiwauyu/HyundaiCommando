@@ -1,4 +1,4 @@
-on: [pull_request, workflow_dispatch]
+on: [workflow_dispatch]
 name: Create PRs for php-cs-fixer fixups
 
 jobs:
@@ -9,6 +9,8 @@ jobs:
             - uses: actions/checkout@v2
             - uses: docker://oskarstark/php-cs-fixer-ga:latest
             - uses: peter-evans/create-pull-request@v2
+              with:
+                args: --config=.php-cs-fixer.php --diff --dry-run
               id: cpr
               with:
                   token: ${{ secrets.GITHUB_TOKEN }}
