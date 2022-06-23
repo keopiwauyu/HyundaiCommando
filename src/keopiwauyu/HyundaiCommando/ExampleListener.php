@@ -7,14 +7,14 @@ namespace keopiwauyu\HyundaiCommando;
 use pocketmine\event\Listener;
 use pocketmine\event\server\DataPacketSendEvent;
 
-class ExampleListener implements Listener{
+class ExampleListener implements Listener
+{
 
-	/**
-	 * @param DataPacketSendEvent $event
-	 *
-	 * @priority HIGH
-	 */
-	public function onDataPacketSendEvent(DataPacketSendEvent $event) : void{
-		// TODO: change ugly stirng enum name
-	}
+    /**
+     * @priority HIGH
+     */
+    public function onDataPacketSendEvent(DataPacketSendEvent $event) : void
+    {
+        // TODO: change ugly stirng enum name
+    }
 }
