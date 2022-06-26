@@ -138,7 +138,7 @@ class HyundaiCommand extends BaseCommand
 
     private function getFallbackPrefix() : string
     {
-        $label = $this->cmd->getLabel();
+        $label = $this->cmd instanceof Command ? $this->cmd->getLabel() : $this->cmd->getParent()->getLabel();
         return explode(":", $label)[0];
     }
 

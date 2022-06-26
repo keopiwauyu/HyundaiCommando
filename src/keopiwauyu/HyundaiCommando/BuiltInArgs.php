@@ -103,11 +103,18 @@ class BuiltInArgs
      */
     public static function subCommand(string $name, bool $optional, array $other) : BaseSubCommand
     {
-        $sub = self::subCommandNoFork($name, $optional, $other);
+        $sub = self::subCommandNoLink($name, $optional, $other);
+        if (!$sub instanceof HyundaiSubCommand) throw new RegistrationException("Cannot get subcommand config from " . $sub::class);
         $config = $sub->config;
         if ($config->link) {
-                $args = $sub->getArgumentList();
-                $link = new HyundaiCommand($sub);
+            $argsss = $sub->getArgumentList();
+            $args = [];
+            foreach ($argsss as $argss) {
+                foreach ($argss as $arg) {
+$args[] = $arg; // Commando very weird??? hmm
+                }
+            } 
+                $link = new HyundaiCommand($sub, $args);
                 $link->logRegister();
         }
 
@@ -118,7 +125,7 @@ class BuiltInArgs
      * @param mixed[] $other
      * @throws RegistrationException Subcommand cannot contain another subcommand.
      */
-    public static function subCommandNoFork(string $name, bool $optional, array $other) : BaseSubCommand
+    public static function subCommandNoLink(string $name, bool $optional, array $other) : BaseSubCommand
     {
         try {
             $config = SubCommandConfig::unmarshal($other);

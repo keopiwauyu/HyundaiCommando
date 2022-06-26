@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace keopiwauyu\HyundaiCommando;
 
+use CortexPE\Commando\BaseCommand;
 use CortexPE\Commando\BaseSubCommand;
 use function array_unshift;
 use keopiwauyu\HyundaiCommando\SubCommandConfig;
@@ -15,7 +16,7 @@ class HyundaiSubCommand extends BaseSubCommand
 
     public SubCommandConfig $config;
 
-public function getParent() : Command {
+public function getParent() : BaseCommand {
     return $this->parent;
 }
     protected function prepare() : void
