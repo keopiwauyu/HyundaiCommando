@@ -12,7 +12,6 @@ use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\event\EventPriority;
 use pocketmine\event\player\PlayerLoginEvent;
-use pocketmine\lang\Translatable;
 use pocketmine\math\Vector3;
 use pocketmine\Server;
 use ReflectionClass;
