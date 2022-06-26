@@ -6,19 +6,17 @@ namespace keopiwauyu\HyundaiCommando;
 
 use CortexPE\Commando\BaseCommand;
 use CortexPE\Commando\BaseSubCommand;
-use function array_unshift;
-use keopiwauyu\HyundaiCommando\SubCommandConfig;
-use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
+use function array_unshift;
 
 class HyundaiSubCommand extends BaseSubCommand
 {
-
     public SubCommandConfig $config;
 
-public function getParent() : BaseCommand {
-    return $this->parent;
-}
+    public function getParent() : BaseCommand
+    {
+        return $this->parent;
+    }
     protected function prepare() : void
     {
     }
