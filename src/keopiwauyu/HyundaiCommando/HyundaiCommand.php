@@ -54,11 +54,8 @@ class HyundaiCommand extends BaseCommand
         }
 
         $d = $this->cmd->getDescription();
-        if ($d instanceof Translatable) {
-            $d = $d->getText();
-            MainClass::getInstance()->getLogger()->warning("Commando only supports pure-string description, so the description of '" . $this->cmd->getName() . "' is changed to: $d");
-        }
-        parent::__construct(MainClass::getInstance(), $this->cmd->getName(), $d, $this->cmd->getAliases());
+        parent::__construct(MainClass::getInstance(), $this->cmd->getName(), "", $this->cmd->getAliases());
+        $this->setDescription($d);
         if ($this->cmd instanceof Command) {
             $map->unregister($this->cmd);
         }
