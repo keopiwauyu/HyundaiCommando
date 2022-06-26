@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace keopiwauyu\HyundaiCommando;
 
-use CortexPE\Commando\BaseSubCommand;
 use CortexPE\Commando\args\BaseArgument;
 use CortexPE\Commando\args\BlockPositionArgument;
 use CortexPE\Commando\args\BooleanArgument;
@@ -13,12 +12,13 @@ use CortexPE\Commando\args\IntegerArgument;
 use CortexPE\Commando\args\RawStringArgument;
 use CortexPE\Commando\args\TextArgument;
 use CortexPE\Commando\args\Vector3Argument;
+use CortexPE\Commando\BaseSubCommand;
 use CortexPE\Commando\exception\ArgumentOrderException;
+use libMarshal\exception\GeneralMarshalException;
+use libMarshal\exception\UnmarshalException;
 use function array_values;
 use function is_scalar;
 use function ksort;
-use libMarshal\exception\GeneralMarshalException;
-use libMarshal\exception\UnmarshalException;
 
 class BuiltInArgs
 {
@@ -97,25 +97,27 @@ class BuiltInArgs
         return new StringEnum($name, $optional, $other); // @phpstan-ignore-line TODO: string enum.
     }
 
-        /**
+    /**
      * @param mixed[] $other
      * @throws RegistrationException Subcommand cannot contain another subcommand.
      */
     public static function subCommand(string $name, bool $optional, array $other) : BaseSubCommand
     {
         $sub = self::subCommandNoLink($name, $optional, $other);
-        if (!$sub instanceof HyundaiSubCommand) throw new RegistrationException("Cannot get subcommand config from " . $sub::class);
+        if (!$sub instanceof HyundaiSubCommand) {
+            throw new RegistrationException("Cannot get subcommand config from " . $sub::class);
+        }
         $config = $sub->config;
         if ($config->link) {
             $argsss = $sub->getArgumentList();
             $args = [];
             foreach ($argsss as $argss) {
                 foreach ($argss as $arg) {
-$args[] = $arg; // Commando very weird??? hmm
+                    $args[] = $arg; // Commando very weird??? hmm
                 }
-            } 
-                $link = new HyundaiCommand($sub, $args);
-                $link->logRegister();
+            }
+            $link = new HyundaiCommand($sub, $args);
+            $link->logRegister();
         }
 
         return $sub;

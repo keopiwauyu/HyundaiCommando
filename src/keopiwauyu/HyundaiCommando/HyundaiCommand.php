@@ -18,6 +18,7 @@ use pocketmine\Server;
 use ReflectionClass;
 use function array_filter;
 use function array_merge;
+use function array_unshift;
 use function assert;
 use function explode;
 use function is_bool;
@@ -58,7 +59,9 @@ class HyundaiCommand extends BaseCommand
             MainClass::getInstance()->getLogger()->warning("Commando only supports pure-string description, so the description of '" . $this->cmd->getName() . "' is changed to: $d");
         }
         parent::__construct(MainClass::getInstance(), $this->cmd->getName(), $d, $this->cmd->getAliases());
-        if ($this->cmd instanceof Command) $map->unregister($this->cmd);
+        if ($this->cmd instanceof Command) {
+            $map->unregister($this->cmd);
+        }
         $map->register($this->getFallbackPrefix(), $this);
     }
 
@@ -125,8 +128,9 @@ class HyundaiCommand extends BaseCommand
                 default => [$arg]
             });
         }
-        if ($this->cmd instanceof Command ) $cmd = $this->cmd;
-        else {
+        if ($this->cmd instanceof Command ) {
+            $cmd = $this->cmd;
+        } else {
             $cmd = $this->cmd->getParent();
             array_unshift($newArgs, $this->cmd->getName());
         }
@@ -147,7 +151,8 @@ class HyundaiCommand extends BaseCommand
         $this->register(Server::getInstance()->getCommandMap());
     }
 
-    public function logRegister() : void {
+    public function logRegister() : void
+    {
         $this->simpleRegister();
         MainClass::getInstance()->getLogger()->debug("Registered '" . $this->getLabel() . "'");
     }
