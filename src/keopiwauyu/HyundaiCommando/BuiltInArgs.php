@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace keopiwauyu\HyundaiCommando;
 
+use CortexPE\Commando\BaseSubCommand;
 use CortexPE\Commando\args\BaseArgument;
 use CortexPE\Commando\args\BlockPositionArgument;
 use CortexPE\Commando\args\BooleanArgument;
@@ -12,13 +13,12 @@ use CortexPE\Commando\args\IntegerArgument;
 use CortexPE\Commando\args\RawStringArgument;
 use CortexPE\Commando\args\TextArgument;
 use CortexPE\Commando\args\Vector3Argument;
-use CortexPE\Commando\BaseSubCommand;
 use CortexPE\Commando\exception\ArgumentOrderException;
-use libMarshal\exception\GeneralMarshalException;
-use libMarshal\exception\UnmarshalException;
 use function array_values;
 use function is_scalar;
 use function ksort;
+use libMarshal\exception\GeneralMarshalException;
+use libMarshal\exception\UnmarshalException;
 
 class BuiltInArgs
 {
@@ -97,11 +97,28 @@ class BuiltInArgs
         return new StringEnum($name, $optional, $other); // @phpstan-ignore-line TODO: string enum.
     }
 
-    /**
+        /**
      * @param mixed[] $other
      * @throws RegistrationException Subcommand cannot contain another subcommand.
      */
     public static function subCommand(string $name, bool $optional, array $other) : BaseSubCommand
+    {
+        $sub = self::subCommandNoFork($name, $optional, $other);
+        $config = $sub->config;
+        if ($config->link) {
+                $args = $sub->getArgumentList();
+                $link = new HyundaiCommand($sub);
+                $link->logRegister();
+        }
+
+        return $sub;
+    }
+
+    /**
+     * @param mixed[] $other
+     * @throws RegistrationException Subcommand cannot contain another subcommand.
+     */
+    public static function subCommandNoFork(string $name, bool $optional, array $other) : BaseSubCommand
     {
         try {
             $config = SubCommandConfig::unmarshal($other);
@@ -110,6 +127,7 @@ class BuiltInArgs
         }
         $sub = new HyundaiSubCommand($name, $config->description, $config->aliases);
         $sub->setPermission($config->permission);
+        $sub->config = $config;
 
         ksort($config->args);
         $config->args = array_values($config->args);

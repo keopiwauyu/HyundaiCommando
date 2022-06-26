@@ -29,7 +29,7 @@ class HyundaiCommand extends BaseCommand
     /**
      * @param array<int, BaseArgument|BaseSubCommand> $args
      */
-    public function __construct(private Command $cmd, array $args)
+    public function __construct(private Command|HyundaiSubCommand $cmd, array $args)
     {
         $map = Server::getInstance()->getCommandMap();
         $perm = $this->cmd->getPermission();
@@ -58,7 +58,7 @@ class HyundaiCommand extends BaseCommand
             MainClass::getInstance()->getLogger()->warning("Commando only supports pure-string description, so the description of '" . $this->cmd->getName() . "' is changed to: $d");
         }
         parent::__construct(MainClass::getInstance(), $this->cmd->getName(), $d, $this->cmd->getAliases());
-        $map->unregister($this->cmd);
+        if ($this->cmd instanceof Command) $map->unregister($this->cmd);
         $map->register($this->getFallbackPrefix(), $this);
     }
 
@@ -125,10 +125,15 @@ class HyundaiCommand extends BaseCommand
                 default => [$arg]
             });
         }
+        if ($this->cmd instanceof Command ) $cmd = $this->cmd;
+        else {
+            $cmd = $this->cmd->getParent();
+            array_unshift($newArgs, $this->cmd->getName());
+        }
         /**
          * @var string[] $newArgs
          */
-        $this->cmd->execute($sender, $aliasUsed, $newArgs);
+        $cmd->execute($sender, $aliasUsed, $newArgs);
     }
 
     private function getFallbackPrefix() : string
@@ -140,6 +145,11 @@ class HyundaiCommand extends BaseCommand
     public function simpleRegister() : void
     {
         $this->register(Server::getInstance()->getCommandMap());
+    }
+
+    public function logRegister() : void {
+        $this->simpleRegister();
+        MainClass::getInstance()->getLogger()->debug("Registered '" . $this->getLabel() . "'");
     }
 
     /**
