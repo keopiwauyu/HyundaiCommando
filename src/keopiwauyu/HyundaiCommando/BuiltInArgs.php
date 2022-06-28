@@ -103,6 +103,32 @@ class BuiltInArgs
      */
     public static function subCommand(string $name, bool $optional, array $other) : BaseSubCommand
     {
+        $sub = self::subCommandNoLink($name, $optional, $other);
+        if (!$sub instanceof HyundaiSubCommand) {
+            throw new RegistrationException("Cannot get subcommand config from " . $sub::class);
+        }
+        $config = $sub->config;
+        if ($config->link) {
+            $argsss = $sub->getArgumentList();
+            $args = [];
+            foreach ($argsss as $argss) {
+                foreach ($argss as $arg) {
+                    $args[] = $arg; // Commando very weird??? hmm
+                }
+            }
+            $link = new HyundaiCommand($sub, $args);
+            $link->logRegister();
+        }
+
+        return $sub;
+    }
+
+    /**
+     * @param mixed[] $other
+     * @throws RegistrationException Subcommand cannot contain another subcommand.
+     */
+    public static function subCommandNoLink(string $name, bool $optional, array $other) : BaseSubCommand
+    {
         try {
             $config = SubCommandConfig::unmarshal($other);
         } catch (GeneralMarshalException|UnmarshalException $err) {
@@ -110,6 +136,7 @@ class BuiltInArgs
         }
         $sub = new HyundaiSubCommand($name, $config->description, $config->aliases);
         $sub->setPermission($config->permission);
+        $sub->config = $config;
 
         ksort($config->args);
         $config->args = array_values($config->args);

@@ -79,8 +79,7 @@ class MainClass extends PluginBase
             $this->getLogger()->debug("Queued command registration for '$label'");
             $generators[] = (function() use ($label, $args) : Generator {
                 $cmd = yield from HyundaiCommand::fromLabel($label, $args);
-                $cmd->simpleRegister();
-                $this->getLogger()->debug("Registered '$label'");
+                $cmd->logRegister();
             })();
         }
         foreach ($generators as $generator) {
