@@ -125,7 +125,7 @@ class HyundaiCommand extends BaseCommand
                 default => [$arg]
             });
         }
-        if ($this->cmd instanceof Command ) {
+        if ($this->cmd instanceof Command) {
             $cmd = $this->cmd;
         } else {
             $cmd = $this->cmd->getParent();
