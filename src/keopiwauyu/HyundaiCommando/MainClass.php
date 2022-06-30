@@ -63,7 +63,7 @@ class MainClass extends PluginBase
         }
 
         $orders = array_keys($configs);
-        foreach ($configs as $name => $config) self::arrangeArg($configs, $orders, $config->name, []);
+        foreach ($configs as $name => $config) ArgConfig::arrangeLoadOrder($configs, $orders, $config->name, []);
 
         $args = [];
         foreach ($orders as $name) {
@@ -76,23 +76,6 @@ $args[$name] = HyundaiCommand::configToArg($config);
         }
 
         return $args;
-    }
-
-    /**
-     * @param array<string, ArgConfig> $configs
-     * @param string[] $orders
-     * @param string[] $trace
-     * @throws \Exception
-     */
-    private static function arrangeArg(array $configs,array &$orders, string $name, array $trace) : void {
-        $oldTrace = $trace;
-        $trace[] = $name;
-        if (in_array($name, $oldTrace, true)) throw new \Exception("'$name': recursive dependency (" . implode(" => ", $trace) . ")");
-
-            if (in_array($name, $orders, true)) continue;
-           foreach ($config->depends as $depend) {
-            if ($depend === $name) throw new \Exception("'$name' depends on itself");
-            if (array_search($depend, $orders, true) === false) self::arrangeArg($configs, $orders, $trace);
     }
 
     public function onEnable() : void

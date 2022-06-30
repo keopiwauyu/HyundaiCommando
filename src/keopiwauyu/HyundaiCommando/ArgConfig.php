@@ -37,4 +37,22 @@ class ArgConfig
     public function getDepend(string $name) : BaseArgument|BaseSubCommand {
         return $this->depended[$name] ?? throw new RegistrationException("'" . $this->name . "' has unknown depend: $name");
     }
+
+    /**
+     * @param array<string, ArgConfig> $configs
+     * @param string[] $orders
+     * @param string[] $trace
+     * @throws \Exception
+     */
+    public static function arrangeLoadOrder(array $configs,array &$orders, string $name, array $trace) : void {
+        $oldTrace = $trace;
+        $trace[] = $name;
+        if (in_array($name, $oldTrace, true)) throw new \Exception("'$name': recursive depend ('" . implode("' => '", $trace) . "')");
+
+            if (in_array($name, $orders, true)) return;
+            $config = $configs[$name];
+           foreach ($config->depends as $depend) {
+            if (array_search($depend, $orders, true) === false) self::arrangeLoadOrder($configs, $orders, $depend, $trace);
+        }
+    }
 }

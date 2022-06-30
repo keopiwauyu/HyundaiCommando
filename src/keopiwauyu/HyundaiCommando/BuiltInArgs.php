@@ -127,6 +127,7 @@ class BuiltInArgs
     public static function subCommandNoLink(ArgConfig $config) : BaseSubCommand
     {
         $other = $config->other;
+        $name = $config->name;
         try {
             $subConfig = SubCommandConfig::unmarshal($other);
         } catch (GeneralMarshalException|UnmarshalException $err) {
@@ -134,7 +135,7 @@ class BuiltInArgs
         }
         $sub = new HyundaiSubCommand($name, $subConfig->description, $subConfig->aliases);
         $sub->setPermission($subConfig->permission);
-        $sub->subConfig = $subConfig;
+        $sub->config = $subConfig;
 
         ksort($subConfig->args);
         $subConfig->args = array_values($subConfig->args);

@@ -29,7 +29,7 @@ class ArgConfigParser implements ArrayParseable
     {
         $data = [];
         foreach ($value as $k => $v) {
-            if (!$v instanceof ArgConfig) $data[$k] = $v->marshal();
+$data[$k] =$v instanceof ArgConfig ? $v->marshal() : $v;
         }
 
         /**

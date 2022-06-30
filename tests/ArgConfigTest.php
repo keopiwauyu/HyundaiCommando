@@ -20,6 +20,7 @@ class ArgConfigTest extends TestCase {
 			"type" => "hello",
 			"optional" => true,
 			"name" => "world",
+			"depends" => [],
 			"other" => []
 		];
 
@@ -32,6 +33,7 @@ return new ArgConfig(
 			type: "hello",
 			optional: true,
 			name: "world",
+			depends: [],
 			other: []
 		);
 	}
@@ -49,7 +51,7 @@ return new ArgConfig(
 		HyundaiCommand::configToArg($this->configProvider());
 	}
 
-	public function testConfigtoArg() : void {
+	public function testConfigToArg() : void {
 		HyundaiCommand::resetArgTypes();
 		foreach (self::ARG_FACTORY_TO_CLASS as $type => $class) {
 			$arg = HyundaiCommand::configToArg($config = $this->configProviderWithType($type));
@@ -70,4 +72,24 @@ return new ArgConfig(
 			"Text" => TextArgument::class // ENEED TO PUT BEHIND ALL THINGS BECAUSE AERROR!!!!
 			// TODO: sitrng enum teste.
 	];
+
+	public function testGetUnknownDepend() : void {
+		$this->expectException(RegistrationException::class);
+		$this->configProvider()->getDepend("kjsadahiua");
+	}
+
+		public function testArrangeLoadOrderRecursive() : void {
+			$configs = [
+				"two" => $two = $this->configProviderWithType("Boolean"),
+				"one" => $one = $this->configProviderWithType("Boolean"),
+				"three" => $three = $this->configProviderWithType("Boolean")
+			];
+			$one->depends = ["two", "three"];
+			$two->depends = ["three", "one"];
+			$three->depends = ["one", "two"];
+
+		$this->expectException(\Exception::class);
+		$orders = [];
+		ArgConfig::arrangeLoadOrder($configs, $orders, "one", []);
+		}
 }

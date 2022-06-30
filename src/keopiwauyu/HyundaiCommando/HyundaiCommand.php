@@ -77,7 +77,13 @@ class HyundaiCommand extends BaseCommand
         if ($registerArgs || $subCommand) {
             $args = [];
             foreach (ArgConfigTest::ARG_FACTORY_TO_CLASS as $type => $class) {
-                $args[] = self::$argTypes[$type]($type, true, []); // TODO: found bug !!! break my ph untt test
+                $args[] = self::$argTypes[$type](new ArgConfig(
+                    type: $type,
+                    optional: true,
+                    name: $class,
+                    depends: [],
+                    other: []
+                )); // TODO: found bug !!! break my ph untt test
             }
         }
 
