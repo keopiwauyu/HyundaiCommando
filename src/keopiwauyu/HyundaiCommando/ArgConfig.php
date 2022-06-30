@@ -30,4 +30,11 @@ class ArgConfig
      * @var array<string, BaseArgument|BaseSubCommand>
      */
     public array $dependeds;
+
+    /**
+     * @throws RegistrationException
+     */
+    public function getDepend(string $name) : BaseArgument|BaseSubCommand {
+        return $this->depended[$name] ?? throw new RegistrationException("'" . $this->name . "' has unknown depend: $name");
+    }
 }

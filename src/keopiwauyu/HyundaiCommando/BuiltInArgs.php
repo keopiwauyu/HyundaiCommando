@@ -139,9 +139,12 @@ class BuiltInArgs
         ksort($subConfig->args);
         $subConfig->args = array_values($subConfig->args);
         foreach ($subConfig->args as $i => $argConfig) {
+            if (is_string($argConfig)) $arg = $config->getDepend($argConfig);
+            else {
             $arg = HyundaiCommand::configToArg($argConfig);
             if ($arg instanceof BaseSubCommand) {
                 throw new RegistrationException("Subcommand '$name' cannot contain another subcommand");
+            }
             }
             try {
                 $sub->registerArgument($i, $arg);
