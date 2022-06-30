@@ -23,18 +23,12 @@ class WantFactoryEvent extends PluginEvent
 {
     /**
      * @param T $wanter
+     * @param array<string, Arg> $args
      */
-    public function __construct(private Arg|Sub $wanter) {
+    public function __construct(private Arg|Sub $wanter, private array $args) {
         parent::__construct(MainClass::getInstance());
         $this->factoryPlugin = MainClass::getInstance();
-        $this->factory = ($wanter instanceof Sub ? static function (Arg $arg) : \Generator {
-            $depends = [];
-            foreach ($arg->config->dependsArg as $name => $dependArg) {
-                $depend = yield from $dependArg->loading->get();
-                if ($depend instanceof \Exception) throw $depend;
-                $depends[$name] = $depend;
-            }
-
+        $this->factory = ($wanter instanceof Sub ? static function (Arg $arg, array $args) : \Generator {
 $class = match ($arg->config->getType()) {
     "boolean" => BooleanArgument::class,
     "integer" => IntegerArgument::class,
@@ -46,9 +40,16 @@ $class = match ($arg->config->getType()) {
     default => throw new \Exception("No factory for arg");
 }();
 return new $class($arg->config->name, $arg->config->optional);
-        } : static function (Sub $sub) : \Generator {
-            // TODO: sub.
-        })($wanter);
+        } : static function (Sub $sub, array $args) : \Generator {
+            $subcmd = new HyundaiSubCommand($sub->config->name, $sub->config->description, $sub->config->aliases);
+            $subcmd->setPermission($sub->config->permission);
+            foreach ($subcmd->args as $position => $group) foreach ($group as $arg) {
+                // TODO: anonyous nad link
+                $subcmd->registerArgument($position, yield from $args[$arg]->loading->get());
+            }
+
+            return $subcmd;
+        })($this->getWanter(), $this->getArgs());
     }
 
     /**
@@ -77,12 +78,19 @@ return new $class($arg->config->name, $arg->config->optional);
     }
 
     /**
-     * @param \Closure(T) : \Generator<mixed, mixed, mixed, U> $factory
+     * @param \Closure(T, array) : \Generator<mixed, mixed, mixed, U> $factory
      */
     public function setFactory(Plugin $factoryPlugin, \Closure $factory) : self {
         $this->factoryPlugin = $factoryPlugin;
-        $this->factory = $factory();
+        $this->factory = $factory($this->getWanter(), $this->getArgs());
 
         return $this;
+    }
+
+    /**
+     * @return array<string, Arg>
+     */
+    public function getArgs() : array {
+        return $this->args;
     }
 }

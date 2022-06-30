@@ -29,29 +29,21 @@ class Arg
         #[Field] public string $name = "", // TODO: support langusges??
         #[Field] public string $type = "",
         #[Field] public bool $optional = false,
-        #[Field] public array $depends = [],
         #[Field] public array $other = []
     ) {
     }
-
-    /**
-     * @var array<string, self>
-     */
-    public array $dependsArg;
 
     public self $config;
 
     /**
      * @param array<string, self> $args
      * @return \Generator<mixed, mixed, mixed, BaseArgument|null>
+     * @throws \Exception
      */
     public function load(array $args, Mutex $lock) : \Generator {
-        yield from $lock->acquire();
-        $lock->release();
-
-        $event = new WantFactoryEvent($this);
+        $event = new WantFactoryEvent($this, $args);
         $event->call();
-        yield from $event->getFactory();
+        return yield from $event->getFactory();
     }
 
     public function getType() : string {
