@@ -48,11 +48,9 @@ class ArgConfig
         $oldTrace = $trace;
         $trace[] = $name;
         if (in_array($name, $oldTrace, true)) throw new \Exception("'$name': recursive depend ('" . implode("' => '", $trace) . "')");
-
-            if (in_array($name, $orders, true)) return;
+        if (in_array($name, $orders, true)) return;
             $config = $configs[$name];
-           foreach ($config->depends as $depend) {
-            if (array_search($depend, $orders, true) === false) self::arrangeLoadOrder($configs, $orders, $depend, $trace);
-        }
+           foreach ($config->depends as $depend) self::arrangeLoadOrder($configs, $orders, $depend, $trace);
+           $orders[] = $name;
     }
 }

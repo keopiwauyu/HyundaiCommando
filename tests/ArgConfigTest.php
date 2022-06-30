@@ -90,6 +90,28 @@ return new ArgConfig(
 
 		$this->expectException(\Exception::class);
 		$orders = [];
-		ArgConfig::arrangeLoadOrder($configs, $orders, "one", []);
+		foreach ($configs as $name => $config)ArgConfig::arrangeLoadOrder($configs, $orders, $name,[]);
 		}
+
+		public function testArrangeLoadOrder() : void {
+			$configs = [
+				"four" => $four = $this->configProviderWithType("Boolean"),
+				"two" => $two = $this->configProviderWithType("Boolean"),
+				"one" => $one = $this->configProviderWithType("Boolean"),
+				"three" => $three = $this->configProviderWithType("Boolean")
+			];
+			$one->depends = ["two"];
+			$three->depends = ["one", "two"];
+			$four->depends = ["three"];
+
+		$orders = [];
+		foreach ($configs as $name => $config)ArgConfig::arrangeLoadOrder($configs, $orders, $name,[]);
+
+		$this->assertSame([
+			"two",
+			"one",
+			"three",
+			"four"
+		], $orders);
+	}
 }
