@@ -180,9 +180,10 @@ class HyundaiCommand extends BaseCommand
     }
 
     /**
-     * @throwss RegistrationException
+     * @param array<string, BaseArgument|BaseSubCommand> $depends
+     * @throws RegistrationException
      */
-    public static function configToArg(ArgConfig $config) : BaseArgument|BaseSubCommand
+    public static function configToArg(ArgConfig $config, array $depends) : BaseArgument|BaseSubCommand
     {
         $type = $config->type;
         $name = $config->name;

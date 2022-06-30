@@ -5,13 +5,8 @@ declare(strict_types=1);
 namespace keopiwauyu\HyundaiCommando;
 
 use CortexPE\Commando\PacketHooker;
+use CortexPE\Commando\args\BaseArgument;
 use Generator;
-use libMarshal\exception\GeneralMarshalException;
-use libMarshal\exception\UnmarshalException;
-use pocketmine\command\Command;
-use pocketmine\command\CommandSender;
-use pocketmine\plugin\PluginBase;
-use pocketmine\utils\TextFormat;
 use SOFe\AwaitGenerator\Await;
 use SOFe\AwaitStd\AwaitStd;
 use function array_diff;
@@ -23,6 +18,12 @@ use function scandir;
 use function str_replace;
 use function trim;
 use function yaml_parse_file;
+use libMarshal\exception\GeneralMarshalException;
+use libMarshal\exception\UnmarshalException;
+use pocketmine\command\Command;
+use pocketmine\command\CommandSender;
+use pocketmine\plugin\PluginBase;
+use pocketmine\utils\TextFormat;
 
 class MainClass extends PluginBase
 {
@@ -39,11 +40,71 @@ class MainClass extends PluginBase
         $this->getLogger()->info(TextFormat::WHITE . "thax u using HYUNDAI COMMANDO V0.0.1 BY ☕️🥛!");
     }
 
+    /**
+     * @return array<string, BaseArgument|BaseSubCommand>
+     * @throws \Exception
+     */
+    private function loadGlobalArgs() : array {
+        $path = $this->getDataFolder() . "global-args.yml";
+        if (!file_exists($path)) {
+            return [];
+        }
+        $data = @yaml_parse_file($path);
+        if (!is_array($args)) {
+            throw new \Exception("yaml_parse_file($path) result is not array");
+        }
+
+        foreach ($data as $name => $datum) {
+                try {
+                    $configs[$name] = ArgConfig::unmarshal($v);
+                } catch (GeneralMarshalException|UnmarshalException $err) {
+                    throw new \Exception("'$name': ". $err->getMessage());
+                }
+        }
+
+        $orders = array_keys($configs);
+        foreach ($configs as $name => $config) self::arrangeArg($configs, $orders, $config->name, []);
+
+        $depends = [];
+        foreach ($orders as $name) {
+            $config = $configs[$name];
+$depends[$name] = HyundaiCommand::configToArg($config, $depends);
+        }
+
+        return $depends;
+    }
+
+    /**
+     * @param array<string, ArgConfig> $configs
+     * @param string[] $orders
+     * @param string[] $trace
+     * @throws \Exception
+     */
+    private static function arrangeArg(array $configs,array &$orders, string $name, array $trace) : void {
+        $oldTrace = $trace;
+        $trace[] = $name;
+        if (in_array($name, $oldTrace, true)) throw new \Exception("'$name': recursive dependency (" . implode(" => ", $trace) . ")");
+
+            if (in_array($name, $orders, true)) continue;
+           foreach ($config->depends as $depend) {
+            if ($depend === $name) throw new \Exception("'$name' depends on itself");
+            if (array_search($depend, $orders, true) === false) self::arrangeArg($configs, $orders, $trace);
+    }
+
     public function onEnable() : void
     {
         HyundaiCommand::resetArgTypes();
         $this->getLogger()->info(TextFormat::DARK_GREEN . "I've been enabled!");
         $this->std = AwaitStd::init($this);
+
+        try {
+$globalArgs = loadGlobalArgs();
+        } catch (\Exception $err) {
+            $this->suicide("Error when loading global arg " . $err->getMessage());
+            return;
+        }
+        $this->getLogger()->debug("Loaded " . count($globalArgs) . " global args");
+        
 
         @mkdir($path = $this->getDataFolder() . "cmds/");
         $files = scandir($path);
