@@ -20,10 +20,7 @@ class Arg
      */
     private Loading $loading;
 
-    /**
-     * @var self[]
-     */
-    private array $users;
+    private bool $used = false;
 
     public function __construct(
         #[Field] public string $name = "", // TODO: support langusges??
@@ -40,7 +37,10 @@ class Arg
      * @return \Generator<mixed, mixed, mixed, BaseArgument|null>
      * @throws \Exception
      */
-    public function load(array $args, Mutex $lock) : \Generator {
+    public function load(array &$args, Mutex $lock) : \Generator {
+        yield from $lock->acquire()
+        $lock->release();
+
         $event = new WantFactoryEvent($this, $args);
         $event->call();
         return yield from $event->getFactory();

@@ -12,6 +12,7 @@ use CortexPE\Commando\args\FloatArgument;
 use CortexPE\Commando\args\IntegerArgument;
 use CortexPE\Commando\args\RawStringArgument;
 use CortexPE\Commando\args\Vector3Argument;
+use CortexPE\Commando\exception\ArgumentOrderException;
 use pocketmine\event\plugin\PluginEvent;
 use pocketmine\plugin\Plugin;
 
@@ -43,12 +44,8 @@ return new $class($arg->config->name, $arg->config->optional);
         } : static function (Sub $sub, array $args) : \Generator {
             $subcmd = new HyundaiSubCommand($sub->config->name, $sub->config->description, $sub->config->aliases);
             $subcmd->setPermission($sub->config->permission);
-            foreach ($subcmd->args as $position => $group) foreach ($group as $arg) {
-                // TODO: anonyous nad link
-                $subcmd->registerArgument($position, yield from $args[$arg]->loading->get());
-            }
 
-            return $subcmd;
+            return Sub::registerArgs($subcmd, $sub->config->args, $args);
         })($this->getWanter(), $this->getArgs());
     }
 

@@ -26,10 +26,12 @@ use function is_scalar;
 class HyundaiCommand extends BaseCommand
 {
 
+    private Command|HyundaiSubCommand $cmd;
+
     /**
      * @param array<int, BaseArgument|BaseSubCommand> $args
      */
-    public function __construct(private Command|HyundaiSubCommand $cmd, array $args)
+    public function __construct(array $args)
     {
         $map = Server::getInstance()->getCommandMap();
         $perm = $this->cmd->getPermission();
