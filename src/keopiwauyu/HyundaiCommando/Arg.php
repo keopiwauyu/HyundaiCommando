@@ -39,6 +39,8 @@ class Arg
      */
     public array $dependsArg;
 
+    public self $config;
+
     /**
      * @param array<string, self> $args
      * @return \Generator<mixed, mixed, mixed, BaseArgument|null>
@@ -50,5 +52,9 @@ class Arg
         $event = new WantFactoryEvent($this);
         $event->call();
         yield from $event->getFactory();
+    }
+
+    public function getType() : string {
+        return strtolower($this->type);
     }
 }
