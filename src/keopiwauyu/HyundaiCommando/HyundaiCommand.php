@@ -154,9 +154,8 @@ class HyundaiCommand extends BaseCommand
     }
 
     /**
-     * Resets on plugin enable.
-     * @see MainClass::onEnable()
-     * @var array<string, callable(string $name, bool $optional, mixed[] $other) : (BaseArgument|BaseSubCommand)>
+     * @see MainClass::onEnable() Resets on plugin enable.
+     * @var array<string, callable(ArgConfig) : (BaseArgument|BaseSubCommand)>
      */
     public static array $argTypes;
 
@@ -173,23 +172,20 @@ class HyundaiCommand extends BaseCommand
             "StringEnum" => [BuiltInArgs::class, "stringEnumArg"],
             "SubCommand" => [BuiltInArgs::class, "subCommand"]
         ];
-        /**
-         * @var array<string, callable(string $name, bool $optional, mixed[] $other) : (BaseArgument|BaseSubCommand)> $types
-         */
+
         self::$argTypes = $types;
     }
 
     /**
-     * @param array<string, BaseArgument|BaseSubCommand> $depends
      * @throws RegistrationException
      */
-    public static function configToArg(ArgConfig $config, array $depends) : BaseArgument|BaseSubCommand
+    public static function configToArg(ArgConfig $config) : BaseArgument|BaseSubCommand
     {
         $type = $config->type;
         $name = $config->name;
         $factory = self::$argTypes[$type] ?? throw new RegistrationException("Arg '$name' has unknown type: $type");
         $name = $config->name;
-        return $factory($name, $config->optional, $config->other);
+        return $factory($config);
     }
 
     /**

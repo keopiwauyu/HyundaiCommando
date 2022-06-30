@@ -24,86 +24,83 @@ class BuiltInArgs
 {
 
     /**
-     * @param mixed[] $other
+     * @param array<string, BaseArgument|BaseSubCommand> $depends
      */
-    public static function booleanArg(string $name, bool $optional, array $other) : BaseArgument
+    public static function booleanArg(ArgConfig $config) : BaseArgument
     {
-        return new BooleanArgument($name, $optional);
+        return new BooleanArgument($config->name, $config->optional);
     }
 
     /**
-     * @param mixed[] $other
+     * @param array<string, BaseArgument|BaseSubCommand> $depends
      */
-    public static function integerArg(string $name, bool $optional, array $other) : BaseArgument
+    public static function integerArg(ArgConfig $config) : BaseArgument
     {
-        return new IntegerArgument($name, $optional);
+        return new IntegerArgument($config->name, $config->optional);
     }
 
     /**
-     * @param mixed[] $other
+     * @param array<string, BaseArgument|BaseSubCommand> $depends
      */
-    public static function floatArg(string $name, bool $optional, array $other) : BaseArgument
+    public static function floatArg(ArgConfig $config) : BaseArgument
     {
-        return new FloatArgument($name, $optional);
+        return new FloatArgument($config->name, $config->optional);
     }
 
     /**
-     * @param mixed[] $other
+     * @param array<string, BaseArgument|BaseSubCommand> $depends
      */
-    public static function rawStringArg(string $name, bool $optional, array $other) : BaseArgument
+    public static function rawStringArg(ArgConfig $config) : BaseArgument
     {
-        return new RawStringArgument($name, $optional);
+        return new RawStringArgument($config->name, $config->optional);
     }
 
     /**
-     * @param mixed[] $other
+     * @param array<string, BaseArgument|BaseSubCommand> $depends
      */
-    public static function textArg(string $name, bool $optional, array $other) : BaseArgument
+    public static function textArg(ArgConfig $config) : BaseArgument
     {
-        return new TextArgument($name, $optional);
+        return new TextArgument($config->name, $config->optional);
     }
 
     /**
-     * @param mixed[] $other
+     * @param array<string, BaseArgument|BaseSubCommand> $depends
      */
-    public static function vector3Arg(string $name, bool $optional, array $other) : BaseArgument
+    public static function vector3Arg(ArgConfig $config) : BaseArgument
     {
-        return new Vector3Argument($name, $optional);
+        return new Vector3Argument($config->name, $config->optional);
     }
 
     /**
-     * @param mixed[] $other
+     * @param array<string, BaseArgument|BaseSubCommand> $depends
      */
-    public static function blockPositionArg(string $name, bool $optional, array $other) : BaseArgument
+    public static function blockPositionArg(ArgConfig $config) : BaseArgument
     {
-        return new BlockPositionArgument($name, $optional);
+        return new BlockPositionArgument($config->name, $config->optional);
     }
 
     /**
-     * @param mixed[] $other
+     * @param array<string, BaseArgument|BaseSubCommand> $depends
      * @throws RegistrationException
      */
-    public static function stringEnumArgument(string $name, bool $optional, array $other) : BaseArgument
+    public static function stringEnumArgument(ArgConfig $config) : BaseArgument
     {
-        foreach ($other as $v) {
+        foreach ($config->other as $v) {
             if (!is_scalar($v)) {
                 throw new RegistrationException("Other config of string enum arg '$name' is not array<int|string, scalar>");
             }
         }
-        /**
-         * @phpstan-var array<scalar, scalar> $other
-         */
 
-        return new StringEnum($name, $optional, $other); // @phpstan-ignore-line TODO: string enum.
+        throw new \RegistrationException("String enum arg is working in progress");
     }
 
     /**
-     * @param mixed[] $other
+     * @param array<string, BaseArgument|BaseSubCommand> $depends
      * @throws RegistrationException Subcommand cannot contain another subcommand.
      */
-    public static function subCommand(string $name, bool $optional, array $other) : BaseSubCommand
+    public static function subCommand(ArgConfig $config) : BaseSubCommand
     {
-        $sub = self::subCommandNoLink($name, $optional, $other);
+        $sub = self::subCommandNoLink($config);
         if (!$sub instanceof HyundaiSubCommand) {
             throw new RegistrationException("Cannot get subcommand config from " . $sub::class);
         }
@@ -124,23 +121,24 @@ class BuiltInArgs
     }
 
     /**
-     * @param mixed[] $other
+     * @param array<string, BaseArgument|BaseSubCommand> $depends
      * @throws RegistrationException Subcommand cannot contain another subcommand.
      */
-    public static function subCommandNoLink(string $name, bool $optional, array $other) : BaseSubCommand
+    public static function subCommandNoLink(ArgConfig $config) : BaseSubCommand
     {
+        $other = $config->other;
         try {
-            $config = SubCommandConfig::unmarshal($other);
+            $subConfig = SubCommandConfig::unmarshal($other);
         } catch (GeneralMarshalException|UnmarshalException $err) {
-            throw new RegistrationException("Error when parsing config of subcommand '$name': " . $err->getMessage());
+            throw new RegistrationException("Error when parsing subConfig of subcommand '$name': " . $err->getMessage());
         }
-        $sub = new HyundaiSubCommand($name, $config->description, $config->aliases);
-        $sub->setPermission($config->permission);
-        $sub->config = $config;
+        $sub = new HyundaiSubCommand($name, $subConfig->description, $subConfig->aliases);
+        $sub->setPermission($subConfig->permission);
+        $sub->subConfig = $subConfig;
 
-        ksort($config->args);
-        $config->args = array_values($config->args);
-        foreach ($config->args as $i => $argConfig) {
+        ksort($subConfig->args);
+        $subConfig->args = array_values($subConfig->args);
+        foreach ($subConfig->args as $i => $argConfig) {
             $arg = HyundaiCommand::configToArg($argConfig);
             if ($arg instanceof BaseSubCommand) {
                 throw new RegistrationException("Subcommand '$name' cannot contain another subcommand");

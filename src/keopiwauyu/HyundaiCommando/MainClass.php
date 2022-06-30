@@ -65,13 +65,17 @@ class MainClass extends PluginBase
         $orders = array_keys($configs);
         foreach ($configs as $name => $config) self::arrangeArg($configs, $orders, $config->name, []);
 
-        $depends = [];
+        $args = [];
         foreach ($orders as $name) {
             $config = $configs[$name];
-$depends[$name] = HyundaiCommand::configToArg($config, $depends);
+            $config->dependeds = array_map(
+                fn(string $depend) => $args[$depend],
+                $config->depends
+            );
+$args[$name] = HyundaiCommand::configToArg($config);
         }
 
-        return $depends;
+        return $args;
     }
 
     /**

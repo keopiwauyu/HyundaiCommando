@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace keopiwauyu\HyundaiCommando;
 
-use libMarshal\attributes\Field;
+use CortexPE\Commando\BaseSubCommand;
+use CortexPE\Commando\args\BaseArgument;
 use libMarshal\MarshalTrait;
+use libMarshal\attributes\Field;
 
 class ArgConfig
 {
@@ -13,7 +15,7 @@ class ArgConfig
 
     /**
      * @param mixed[] $other
-     * @param string[] $use
+     * @param string[] $depends
      */
     public function __construct(
         #[Field] public string $type,
@@ -23,4 +25,9 @@ class ArgConfig
         #[Field] public array $other
     ) {
     }
+
+    /**
+     * @var array<string, BaseArgument|BaseSubCommand>
+     */
+    public array $dependeds;
 }
