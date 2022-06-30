@@ -162,9 +162,9 @@ Sub::registerArgs($cmd, $datum);
                    );
                 }
 
+                $cmd->init($old);
                 $map->unregister($old);
-                $map->register($cmd);
-                $this->getLogger()->debug("Registered cmd '$label'");
+                $cmd->logRegister();
             });
         }
     }

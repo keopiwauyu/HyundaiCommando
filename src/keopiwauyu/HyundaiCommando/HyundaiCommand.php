@@ -4,16 +4,10 @@ declare(strict_types=1);
 
 namespace keopiwauyu\HyundaiCommando;
 
-use CortexPE\Commando\args\BaseArgument;
 use CortexPE\Commando\BaseCommand;
 use CortexPE\Commando\BaseSubCommand;
+use CortexPE\Commando\args\BaseArgument;
 use Generator;
-use pocketmine\command\Command;
-use pocketmine\command\CommandSender;
-use pocketmine\event\EventPriority;
-use pocketmine\event\player\PlayerLoginEvent;
-use pocketmine\math\Vector3;
-use pocketmine\Server;
 use ReflectionClass;
 use function array_filter;
 use function array_merge;
@@ -22,45 +16,40 @@ use function assert;
 use function explode;
 use function is_bool;
 use function is_scalar;
+use pocketmine\Server;
+use pocketmine\command\Command;
+use pocketmine\command\CommandSender;
+use pocketmine\event\EventPriority;
+use pocketmine\event\player\PlayerLoginEvent;
+use pocketmine\math\Vector3;
+use pocketmine\plugin\Plugin;
+use pocketmine\plugin\PluginOwned;
 
 class HyundaiCommand extends BaseCommand
 {
 
     private Command|HyundaiSubCommand $cmd;
 
-    /**
-     * @param array<int, BaseArgument|BaseSubCommand> $args
-     */
-    public function __construct(array $args)
+    public function __construct(HyundaiSubCommand $cmd = null)
     {
-        $map = Server::getInstance()->getCommandMap();
-        $perm = $this->cmd->getPermission();
-        if ($perm !== null) {
-            $this->setPermission($perm);
-        }
-
-        $args = array_filter($args, function (BaseArgument|BaseSubCommand $arg) : bool {
-            if ($arg instanceof BaseSubCommand) {
-                $this->registerSubCommand($arg);
-                return false; // delete from arrasy.
+        if (!isset($cmd)) return;
+            
+            $this->cmd = $cmd;
+            foreach ($cmd->getArgumentList() as $position => $group) {
+                foreach ($group as $arg) $cmd->registerArgument($position, $arg);
             }
+    }
 
-            return true;
-        });
-        /**
-         * @var BaseArgument[] $args
-         */
-        foreach ($args as $i => $arg) {
-            $this->registerArgument($i++, $arg);
-        }
-
-        $d = $this->cmd->getDescription();
-        parent::__construct(MainClass::getInstance(), $this->cmd->getName(), "", $this->cmd->getAliases());
-        $this->setDescription($d);
-        if ($this->cmd instanceof Command) {
-            $map->unregister($this->cmd);
-        }
-        $map->register($this->getFallbackPrefix(), $this);
+    /**
+     * @param string[] $aliases
+     */
+    public function init(Command $cmd) : void {
+        if (isset($this->cmd)) throw new \RuntimeException("Try to init initialized Hyundai Command");
+        $this->cmd = $cmd;
+        $plugin = $cmd instanceof PluginOwned ? $cmd->getOwningPlugin() : MainClass::getInstance();
+        parent::__construct($plugin, $cmd->getName(), $cmd->getDescription(), $cmd->getAliases());
+        $permission = $cmd->getPermission();
+        if ($permission !== null) $this->setPermission($permission);
     }
 
     /**
@@ -138,81 +127,9 @@ class HyundaiCommand extends BaseCommand
         $cmd->execute($sender, $aliasUsed, $newArgs);
     }
 
-    private function getFallbackPrefix() : string
-    {
-        $label = $this->cmd instanceof Command ? $this->cmd->getLabel() : $this->cmd->getParent()->getLabel();
-        return explode(":", $label)[0];
-    }
-
-    public function simpleRegister() : void
-    {
-        $this->register(Server::getInstance()->getCommandMap());
-    }
-
-    public function logRegister() : void
-    {
-        $this->simpleRegister();
-        MainClass::getInstance()->getLogger()->debug("Registered '" . $this->getLabel() . "'");
-    }
-
-    /**
-     * Resets on plugin enable.
-     * @see MainClass::onEnable()
-     * @var array<string, callable(string $name, bool $optional, mixed[] $other) : (BaseArgument|BaseSubCommand)>
-     */
-    public static array $argTypes;
-
-    public static function resetArgTypes() : void
-    {
-        $types = [
-            "Boolean" => [BuiltInArgs::class, "booleanArg"],
-            "Integer" => [BuiltInArgs::class, "integerArg"],
-            "Float" => [BuiltInArgs::class, "floatArg"],
-            "RawString" => [BuiltInArgs::class, "rawStringArg"],
-            "Text" => [BuiltInArgs::class, "textArg"],
-            "Vector3" => [BuiltInArgs::class, "vector3Arg"],
-            "BlockPosition" => [BuiltInArgs::class, "blockPositionArg"],
-            "StringEnum" => [BuiltInArgs::class, "stringEnumArg"],
-            "SubCommand" => [BuiltInArgs::class, "subCommand"]
-        ];
-        /**
-         * @var array<string, callable(string $name, bool $optional, mixed[] $other) : (BaseArgument|BaseSubCommand)> $types
-         */
-        self::$argTypes = $types;
-    }
-
-    /**
-     * @throwss RegistrationException
-     */
-    public static function configToArg(ArgConfig $config) : BaseArgument|BaseSubCommand
-    {
-        $type = $config->type;
-        $name = $config->name;
-        $factory = self::$argTypes[$type] ?? throw new RegistrationException("Arg '$name' has unknown type: $type");
-        $name = $config->name;
-        return $factory($name, $config->optional, $config->other);
-    }
-
-    /**
-     * Get command from its label and make it hyundai.
-     * Wait until it gets registered if it is not.
-     * @param array<int, BaseArgument|BaseSubCommand> $args
-     * @return Generator<mixed, mixed, mixed, HyundaiCommand>
-     */
-    public static function fromLabel(string $label, array $args) : Generator
-    {
-        $map = Server::getInstance()->getCommandMap();
-        while (($cmd = $map->getCommand($label)) === null) {
-            // TODO: Timeout
-            yield from MainClass::getInstance()->std->awaitEvent(
-                PlayerLoginEvent::class,
-                fn() => true,
-                false,
-                EventPriority::MONITOR,
-                false
-            );
-        }
-        assert(isset($cmd));
-        return new self($cmd, $args);
+    public function logRegister() : void {
+        $map = $this->getServer()->getCommandMap();
+                   $map->register(explode(":", $label)[0], $cmd);
+                $this->getLogger()->debug("Registered cmd '$label'"); 
     }
 }

@@ -44,6 +44,9 @@ return new $class($arg->config->name, $arg->config->optional);
         } : static function (Sub $sub, array $args) : \Generator {
             $subcmd = new HyundaiSubCommand($sub->config->name, $sub->config->description, $sub->config->aliases);
             $subcmd->setPermission($sub->config->permission);
+            if ($sub->config->link) {
+                $subcmd->linked = new HyundaiCommand($subcmd);
+            }
 
             return Sub::registerArgs($subcmd, $sub->config->args, $args);
         })($this->getWanter(), $this->getArgs());

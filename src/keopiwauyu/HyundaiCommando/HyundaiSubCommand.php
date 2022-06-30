@@ -11,7 +11,7 @@ use function array_unshift;
 
 class HyundaiSubCommand extends BaseSubCommand
 {
-    public SubCommandConfig $config;
+    public HyundaiCommand $linked;
 
     public function getParent() : BaseCommand
     {
@@ -19,6 +19,7 @@ class HyundaiSubCommand extends BaseSubCommand
     }
     protected function prepare() : void
     {
+        $this->linked->logRegister();
     }
 
     /**
