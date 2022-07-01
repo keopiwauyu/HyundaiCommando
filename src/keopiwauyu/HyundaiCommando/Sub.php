@@ -32,8 +32,6 @@ class Sub
     ) {
     }
 
-    public self $config;
-
     public bool $used = false;
 
        /**
@@ -50,7 +48,6 @@ class Sub
      */
     public static function unmarshalAndLoad(array $data, array $args) : self {
         $self = self::unmarshal($data);
-        $self->config = $self;
         $self->loading = new Loading(function () use ($args, $self) : \Generator { // @phpstan-ignore-line fake
         /**
          * @var WantFactoryEvent<self, BaseSubCommand> $event
@@ -61,42 +58,6 @@ class Sub
         });
 
         return $self;
-    }
-
-    /**
-     * @template T of IArgumentable
-     * @param T $cmd
-     * @param array<string|array<string|mixed[]>> $groups
-     * @param array<string, Arg> $args
-     * @return \Generator<mixed, mixed, mixed, T>
-     * @throws \Exception
-     */
-    public static function registerArgs(IArgumentable $cmd, array $groups, array $args) : \Generator {
-            foreach ($groups as $position => $group) {
-                if (!is_array($group)) {
-                    throw new \Exception("Using subcommand in subcommand");
-                }
-
-               foreach ($group as $id) {
-                if (!is_array($id)) {
-                    $arg = $args[$id] ?? throw new \Exception("Unknown global arg '$id'") ;
-                } else {
-                    try {
-                        $arg = Arg::unmarshal($id);
-                    } catch (GeneralMarshalException|UnmarshalException $err) {
-                        throw new \Exception("anonymous arg", -1, $err);
-                    }
-                }
-                $arg->used = true;
-                try {
-$cmd->registerArgument($position, yield from $arg->config->loading->get());
-                } catch (ArgumentOrderException $err) {
-                    throw new \Exception("Bad argument order", -1, $err);
-                }
-            } 
-            }
-
-            return $cmd;
     }
 
     /**
@@ -118,12 +79,12 @@ $cmd->registerArgument($position, yield from $arg->config->loading->get());
                     }
                 }
                 if (isset($sub)) {
-                    $cmd->registerSubCommand(yield from $sub->config->loading->get());
+                    $cmd->registerSubCommand(yield from $sub->loading->get());
                     unset($groups[$position]);
                     continue;
                 }
             }
 
-            return yield from self::registerArgs($cmd, $groups, $args);
+            return yield from Arg::registerArgs($cmd, $groups, $args);
     }
 }

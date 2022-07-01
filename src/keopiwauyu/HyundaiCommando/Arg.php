@@ -23,7 +23,7 @@ class Arg
     /**
      * @var Loading<BaseArgument>
      */
-    public Loading $loading;
+    private Loading $loading;
 
     public bool $used = false;
 
@@ -38,8 +38,6 @@ class Arg
     ) {
     }
 
-    public self $config;
-
     /**
      * @param mixed[] $data
      * @param array<string, self> $args
@@ -49,7 +47,6 @@ class Arg
      */
     public static function unmarshalAndLoad(array $data, array &$args, Mutex $lock) : self {
         $self = self::unmarshal($data);
-        $self->config = $self;
         $self->loading = new Loading(function () use (&$args, $lock, $self) : \Generator {
         yield from $lock->acquire();
         $lock->release();
@@ -59,13 +56,87 @@ class Arg
          */
         $event = new WantFactoryEvent($self, $args);
         $event->call();
-        return yield from $event->getFactory();
+        $loaded = yield from $event->getFactory();
+
+        return $loaded;
         });
 
         return $self;
     }
 
+    /**
+     * @var self[]
+     */
+    private array $depends;
+
+    /**
+     * @param string[] $depends
+     * @param array<string, self> $args
+     * @return \Generator<mixed, mixed, mixed, array<string, BaseArgument>>
+     */
+    public function setDepends(array $depends, array $args) : \Generator {
+        if (isset($this->depends)) throw new \RuntimeException("Arg depends cannot change after set");
+        $this->depends = $depends;
+$this->checkDependsRecursive($depends, $args, []);
+
+        return yield from Await::all(array_map(
+            static fn(self $self) : \Generator => $self->loading->get(),
+            $depends
+        ));
+    }
+
+    /**
+     * @param string[] $depends
+     * @param array<string, self> $args
+     * @param string[] $trace
+     * @throws \Exception
+     */
+    private function checkDependsRecursive(array $depends, array $args, array $trace) : void {
+        foreach ($depends as $depend) {
+            $clone = $trace;
+            $clone[] = $depend;
+            if (in_array($depend, $trace, true)) throw new \Exception("Recursive arg depend ('" . implode("' => '", $clone) . "')");
+            $this->checkDependsRecursive($args[$depend]->depends, $args, $clone);
+        }
+    }
+
     public function getType() : string {
         return strtolower($this->type);
+    }
+
+    /**
+     * @template T of IArgumentable
+     * @param T $cmd
+     * @param array<string|array<string|mixed[]>> $groups
+     * @param array<string, Arg> $args
+     * @return \Generator<mixed, mixed, mixed, T>
+     * @throws \Exception
+     */
+    public static function registerArgs(IArgumentable $cmd, array $groups, array $args) : \Generator {
+            foreach ($groups as $position => $group) {
+                if (!is_array($group)) {
+                    throw new \Exception("Using subcommand in subcommand");
+                }
+
+               foreach ($group as $id) {
+                if (!is_array($id)) {
+                    $arg = $args[$id] ?? throw new \Exception("Unknown global arg '$id'") ;
+                } else {
+                    try {
+                        $arg = Arg::unmarshal($id);
+                    } catch (GeneralMarshalException|UnmarshalException $err) {
+                        throw new \Exception("anonymous arg", -1, $err);
+                    }
+                }
+                $arg->used = true;
+                try {
+$cmd->registerArgument($position, yield from $arg->loading->get());
+                } catch (ArgumentOrderException $err) {
+                    throw new \Exception("Bad argument order", -1, $err);
+                }
+            } 
+            }
+
+            return $cmd;
     }
 }

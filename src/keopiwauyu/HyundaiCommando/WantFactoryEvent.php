@@ -56,7 +56,7 @@ default => static function (Sub $sub, array $args) : \Generator {
                 $subcmd->linked = new HyundaiCommand($subcmd);
             }
 
-            return yield from Sub::registerArgs($subcmd, $sub->config->args, $args);
+            return yield from Arg::registerArgs($subcmd, $sub->config->args, $args);
         }
         };
         $this->factory = $factory($wanter, $this->getArgs());
