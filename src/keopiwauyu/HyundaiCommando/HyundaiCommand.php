@@ -30,7 +30,7 @@ class HyundaiCommand extends BaseCommand
 
     private Command|HyundaiSubCommand $cmd;
 
-    public function __construct(HyundaiSubCommand $cmd = null)
+    public function __construct(HyundaiSubCommand $cmd = null) // @phpstan-ignore-line parent consturctor
     {
         if (!isset($cmd)) return;
             
@@ -40,14 +40,12 @@ class HyundaiCommand extends BaseCommand
             }
     }
 
-    /**
-     * @param string[] $aliases
-     */
     public function init(Command $cmd) : void {
         if (isset($this->cmd)) throw new \RuntimeException("Try to init initialized Hyundai Command");
         $this->cmd = $cmd;
         $plugin = $cmd instanceof PluginOwned ? $cmd->getOwningPlugin() : MainClass::getInstance();
-        parent::__construct($plugin, $cmd->getName(), $cmd->getDescription(), $cmd->getAliases());
+        parent::__construct($plugin, $cmd->getName(), "", $cmd->getAliases());
+        $this->setDescription($cmd->getDescription());
         $permission = $cmd->getPermission();
         if ($permission !== null) $this->setPermission($permission);
     }
@@ -83,8 +81,9 @@ class HyundaiCommand extends BaseCommand
     }
 
     public function logRegister() : void {
-        $map = $this->getServer()->getCommandMap();
-                   $map->register(explode(":", $label)[0], $cmd);
-                $this->getLogger()->debug("Registered cmd '$label'"); 
+        $label = $this->getLabel();
+        $map = Server::getInstance()->getCommandMap();
+                   $map->register(explode(":", $label)[0], $this);
+                MainClass::getInstance()->getLogger()->debug("Registered cmd '$label'"); 
     }
 }

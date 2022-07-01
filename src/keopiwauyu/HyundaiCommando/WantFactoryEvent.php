@@ -29,7 +29,14 @@ class WantFactoryEvent extends PluginEvent
     public function __construct(private Arg|Sub $wanter, private array $args) {
         parent::__construct(MainClass::getInstance());
         $this->factoryPlugin = MainClass::getInstance();
-        $this->factory = ($wanter instanceof Sub ? static function (Arg $arg, array $args) : \Generator {
+        $wanter = $this->getWanter();
+        /**
+         * @var \Closure(T, array<string, Arg>): \Generator<mixed, mixed, mixed, U> $factory
+         */
+        $factory = match (true) {
+            $wanter instanceof Arg => static function (Arg $arg, array $args) : \Generator {
+            false && yield; // @phpstan-ignore-line php bad
+
 $class = match ($arg->config->getType()) {
     "boolean" => BooleanArgument::class,
     "integer" => IntegerArgument::class,
@@ -38,10 +45,11 @@ $class = match ($arg->config->getType()) {
     "vector3" => Vector3Argument::class,
     "blockposition" => BlockPositionArgument::class,
     "stringenum" => throw new \Exception("String enum arg not supported now"),
-    default => throw new \Exception("No factory for arg");
-}();
+    default => throw new \Exception("No factory for arg")
+};
 return new $class($arg->config->name, $arg->config->optional);
-        } : static function (Sub $sub, array $args) : \Generator {
+        },
+default => static function (Sub $sub, array $args) : \Generator {
             $subcmd = new HyundaiSubCommand($sub->config->name, $sub->config->description, $sub->config->aliases);
             $subcmd->setPermission($sub->config->permission);
             if ($sub->config->link) {
@@ -49,13 +57,15 @@ return new $class($arg->config->name, $arg->config->optional);
             }
 
             return yield from Sub::registerArgs($subcmd, $sub->config->args, $args);
-        })($this->getWanter(), $this->getArgs());
+        }
+        };
+        $this->factory = $factory($wanter, $this->getArgs());
     }
 
     /**
      * @var \Generator<mixed, mixed, mixed, U>
      */
-   private \Closure $factory;
+   private \Generator $factory;
 
    /**
     * @return T
@@ -78,7 +88,8 @@ return new $class($arg->config->name, $arg->config->optional);
     }
 
     /**
-     * @param \Closure(T, array) : \Generator<mixed, mixed, mixed, U> $factory
+     * @param \Closure(T, array<string, Arg>) : \Generator<mixed, mixed, mixed, U> $factory
+     * @return self<T, U>
      */
     public function setFactory(Plugin $factoryPlugin, \Closure $factory) : self {
         $this->factoryPlugin = $factoryPlugin;

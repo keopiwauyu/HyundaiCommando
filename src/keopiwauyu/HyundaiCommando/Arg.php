@@ -4,24 +4,32 @@ declare(strict_types=1);
 
 namespace keopiwauyu\HyundaiCommando;
 
+use CortexPE\Commando\BaseSubCommand;
 use CortexPE\Commando\args\BaseArgument;
 use SOFe\AwaitGenerator\Loading;
 use SOFe\AwaitGenerator\Mutex;
 use keopiwauyu\HyundaiCommando\ArgConfig;
+use libMarshal\MarshalTrait;
+use libMarshal\attributes\Field;
+use libMarshal\exception\GeneralMarshalException;
+use libMarshal\exception\UnmarshalException;
 
 class Arg
 {
     use MarshalTrait;
 
-    private string $id;
+    public string $id;
 
     /**
-     * @var Loading<BaseArgument|self[]|null>
+     * @var Loading<BaseArgument>
      */
-    private Loading $loading;
+    public Loading $loading;
 
-    private bool $used = false;
+    public bool $used = false;
 
+    /**
+     * @param mixed[] $other
+     */
     public function __construct(
         #[Field] public string $name = "", // TODO: support langusges??
         #[Field] public string $type = "",
@@ -33,17 +41,28 @@ class Arg
     public self $config;
 
     /**
+     * @param mixed[] $data
      * @param array<string, self> $args
-     * @return \Generator<mixed, mixed, mixed, BaseArgument|null>
      * @throws \Exception
+     * @throws GeneralMarshalException
+     * @throws UnmarshalException
      */
-    public function load(array &$args, Mutex $lock) : \Generator {
-        yield from $lock->acquire()
+    public static function unmarshalAndLoad(array $data, array &$args, Mutex $lock) : self {
+        $self = self::unmarshal($data);
+        $self->config = $self;
+        $self->loading = new Loading(function () use (&$args, $lock, $self) : \Generator {
+        yield from $lock->acquire();
         $lock->release();
 
-        $event = new WantFactoryEvent($this, $args);
+        /**
+         * @var WantFactoryEvent<self, BaseArgument> $event
+         */
+        $event = new WantFactoryEvent($self, $args);
         $event->call();
         return yield from $event->getFactory();
+        });
+
+        return $self;
     }
 
     public function getType() : string {

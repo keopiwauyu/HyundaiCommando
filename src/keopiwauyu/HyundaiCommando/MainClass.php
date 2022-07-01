@@ -7,6 +7,7 @@ namespace keopiwauyu\HyundaiCommando;
 use CortexPE\Commando\PacketHooker;
 use Generator;
 use SOFe\AwaitGenerator\Await;
+use SOFe\AwaitGenerator\Mutex;
 use SOFe\AwaitStd\AwaitStd;
 use function array_diff;
 use function array_values;
@@ -21,6 +22,7 @@ use libMarshal\exception\GeneralMarshalException;
 use libMarshal\exception\UnmarshalException;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
+use pocketmine\event\EventPriority;
 use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;
@@ -47,11 +49,11 @@ class MainClass extends PluginBase
     }
 
     private static function noTraceErr(\Throwable $err) : string {
-        return implode("\n", Utils::printableExceptionInfo($err, []))
+        return implode("\n", Utils::printableExceptionInfo($err, []));
     }
 
     private function globalErr(string $path, string $id, \Throwable $err) : void {
-        $this->suicide("Error when parsing $argsPath, '$id': " . self::noTraceErr($err)) ;
+        $this->suicide("Error when parsing $path, '$id': " . self::noTraceErr($err)) ;
     }
 
     /**
@@ -63,7 +65,7 @@ class MainClass extends PluginBase
 
     public function onEnable() : void
     {
-        Await::g2c($this->awaitEnable());
+        Await::g2c($this->awaitEnable()); // @phpstan-ignore-line fake error
     }
 
     /**
@@ -77,7 +79,7 @@ class MainClass extends PluginBase
         }
 
         $lock = new Mutex();
-        yield from $mutex->acquire();
+        yield from $lock->acquire();
         $argsData = @yaml_parse_file($argsPath = $this->getDataFolder() . "args.yml");
         if (!is_array($argsData)) {
             $this->yamlErr($argsPath);
@@ -87,14 +89,8 @@ class MainClass extends PluginBase
         $args = [];
         foreach ($argsData as $id => $argData) {
             try {
-$config = Arg::unmarshal($argData);
-            } catch (GeneralMarshalException|UnmarshalException $err) {
-                $this->globalErr($argsPath, $id, $err);
-                return;
-            }
-            try {
-$args[$id] = yield from $config->load($args, $lock);
-            } catch (\Exception $err) {
+$args[$id] = $config = Arg::unmarshalAndLoad($argData, $args, $lock);
+            } catch (GeneralMarshalException|UnmarshalException|\Exception $err) {
                 $this->globalErr($argsPath, $id, $err);
                 return;
             }
@@ -104,19 +100,13 @@ $args[$id] = yield from $config->load($args, $lock);
         $subsData = @yaml_parse_file($subsPath = $this->getDataFolder() . "subcommands.yml");
         if (!is_array($subsData)) {
             $this->yamlErr($subsPath);
-            return
+            return;
         }
         $subs = [];
         foreach ($subsData as $id => $subData) {
             try {
-$config = Sub::unmarshal($subData);
+$subs[$id] = $config = Sub::unmarshalAndLoad($subData, $args);
             } catch (GeneralMarshalException|UnmarshalException $err) {
-                $this->globalErr($subsPath, $id, $err);
-                return;
-            }
-            try {
-$subs[$id] = yield from $config->load($args);
-            } catch (\Exception $err) {
                 $this->globalErr($subsPath, $id, $err);
                 return;
             }
@@ -151,9 +141,9 @@ yield from Sub::registerArgsAndSubs($cmd, $datum, $args, $subs);
 
         $map = $this->getServer()->getCommandMap();
         foreach ($cmds as $label => $cmd) {
-            Await::f2c(function() use ($label) : \Generator {
+            Await::f2c(function() use ($label, $map, $cmd) : \Generator { // @phpstan-ignore-line fake 
                 while (($old = $map->getCommand($label)) === null) {
-                   yield from $this->awaitEvent(
+                   yield from $this->std->awaitEvent(
                     PlayerPreLoginEvent::class,
                     static fn() => true,
                     false,
@@ -161,13 +151,17 @@ yield from Sub::registerArgsAndSubs($cmd, $datum, $args, $subs);
                     false
                    );
                 }
+                assert(isset($old)); // PHPSTAN NO GOD
 
                 $cmd->init($old);
                 $map->unregister($old);
                 $cmd->logRegister();
             });
         }
+
+        foreach (["arg" => $args, "subcommand" => $subs] as $thing => $globals) foreach ($globals as $id => $global) if (!$global->config->used) $this->getLogger()->warning("Global $thing '$id' is not used");
     }
+}
 
     private function suicide(string $description) : void
     {
