@@ -159,7 +159,7 @@ yield from Sub::registerArgsAndSubs($cmd, $datum, $args, $subs);
             });
         }
 
-        foreach (["arg" => $args, "subcommand" => $subs] as $thing => $globals) foreach ($globals as $id => $global) if (!$global->config->used) $this->getLogger()->warning("Global $thing '$id' is not used");
+        foreach (["arg" => $args, "subcommand" => $subs] as $thing => $globals) foreach ($globals as $id => $global) if (!$global->used) $this->getLogger()->warning("Global $thing '$id' is not used");
     }
 }
 

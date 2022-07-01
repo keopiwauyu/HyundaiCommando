@@ -6,6 +6,9 @@ namespace keopiwauyu\HyundaiCommando;
 
 use CortexPE\Commando\BaseSubCommand;
 use CortexPE\Commando\args\BaseArgument;
+use CortexPE\Commando\exception\ArgumentOrderException;
+use CortexPE\Commando\traits\IArgumentable;
+use SOFe\AwaitGenerator\Await;
 use SOFe\AwaitGenerator\Loading;
 use SOFe\AwaitGenerator\Mutex;
 use keopiwauyu\HyundaiCommando\ArgConfig;
@@ -65,7 +68,7 @@ class Arg
     }
 
     /**
-     * @var self[]
+     * @var string[]
      */
     private array $depends;
 
@@ -80,7 +83,7 @@ class Arg
 $this->checkDependsRecursive($depends, $args, []);
 
         return yield from Await::all(array_map(
-            static fn(self $self) : \Generator => $self->loading->get(),
+            fn(string $depend) : \Generator => yield from $args[$depend]->loading->get(),
             $depends
         ));
     }

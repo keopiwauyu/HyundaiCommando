@@ -37,7 +37,7 @@ class WantFactoryEvent extends PluginEvent
             $wanter instanceof Arg => static function (Arg $arg, array $args) : \Generator {
             false && yield; // @phpstan-ignore-line php bad
 
-$class = match ($arg->config->getType()) {
+$class = match ($arg->getType()) {
     "boolean" => BooleanArgument::class,
     "integer" => IntegerArgument::class,
     "float" => FloatArgument::class,
@@ -47,16 +47,16 @@ $class = match ($arg->config->getType()) {
     "stringenum" => throw new \Exception("String enum arg not supported now"),
     default => throw new \Exception("No factory for arg")
 };
-return new $class($arg->config->name, $arg->config->optional);
+return new $class($arg->name, $arg->optional);
         },
 default => static function (Sub $sub, array $args) : \Generator {
-            $subcmd = new HyundaiSubCommand($sub->config->name, $sub->config->description, $sub->config->aliases);
-            $subcmd->setPermission($sub->config->permission);
-            if ($sub->config->link) {
+            $subcmd = new HyundaiSubCommand($sub->name, $sub->description, $sub->aliases);
+            $subcmd->setPermission($sub->permission);
+            if ($sub->link) {
                 $subcmd->linked = new HyundaiCommand($subcmd);
             }
 
-            return yield from Arg::registerArgs($subcmd, $sub->config->args, $args);
+            return yield from Arg::registerArgs($subcmd, $sub->args, $args);
         }
         };
         $this->factory = $factory($wanter, $this->getArgs());
