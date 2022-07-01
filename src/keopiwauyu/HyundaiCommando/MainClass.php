@@ -140,7 +140,7 @@ $label = "$prefix:$id";
             $cmd = new HyundaiCommand();
             $cmds[$label] = $cmd;
             try {
-Sub::registerArgs($cmd, $datum);
+yield from Sub::registerArgsAndSubs($cmd, $datum, $args, $subs);
             } catch (\Exception $err) {
                 $this->globalErr($path . $file, $id, $err);
                 return;

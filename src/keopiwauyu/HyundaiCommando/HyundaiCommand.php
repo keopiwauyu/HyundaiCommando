@@ -52,51 +52,6 @@ class HyundaiCommand extends BaseCommand
         if ($permission !== null) $this->setPermission($permission);
     }
 
-    /**
-     * @internal DO NOT CALL FUNCTION NO TAPI !!!!!!!!!!!!!!!!
-     */
-    public static function createForTesting(Command $cmd, bool $registerArgs, bool $subCommand) : self
-    {
-        $r = new ReflectionClass(self::class);
-        $n = $r->newInstanceWithoutConstructor();
-        $perm = $cmd->getPermission();
-        if ($perm !== null) {
-            $n->setPermission($perm);
-        } // TODO: ithink 100% require permission in pm4????
-        $n->cmd = $cmd;
-
-        if ($registerArgs || $subCommand) {
-            $args = [];
-            foreach (ArgConfigTest::ARG_FACTORY_TO_CLASS as $type => $class) {
-                $args[] = self::$argTypes[$type]($type, true, []); // TODO: found bug !!! break my ph untt test
-            }
-        }
-
-        if ($registerArgs) {
-            /**
-             * @var BaseArgument[] $args
-             */
-            assert(isset($args));
-            foreach ($args as $i => $arg) {
-                $n->registerArgument($i, $arg);
-            }
-        }
-        if ($subCommand) {
-            $sub = new HyundaiSubCommand("aaa", "bbb", [
-                "ccc",
-                "ddd"
-            ]);
-            if ($registerArgs) {
-                foreach ($args as $i => $arg) {
-                    $sub->registerArgument($i, $arg);
-                }
-            }
-            $n->registerSubCommand($sub);
-        }
-
-        return $n;
-    }
-
     protected function prepare() : void
     {
     }

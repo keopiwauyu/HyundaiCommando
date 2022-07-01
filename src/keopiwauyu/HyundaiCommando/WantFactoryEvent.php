@@ -48,7 +48,7 @@ return new $class($arg->config->name, $arg->config->optional);
                 $subcmd->linked = new HyundaiCommand($subcmd);
             }
 
-            return Sub::registerArgs($subcmd, $sub->config->args, $args);
+            return yield from Sub::registerArgs($subcmd, $sub->config->args, $args);
         })($this->getWanter(), $this->getArgs());
     }
 

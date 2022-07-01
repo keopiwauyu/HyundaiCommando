@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace keopiwauyu\HyundaiCommando;
 
+use CortexPE\Commando\BaseCommand;
 use CortexPE\Commando\BaseSubCommand;
 use CortexPE\Commando\traits\IArgumentable;
+use libMarshal\exception\GeneralMarshalException;
+use libMarshal\exception\UnmarshalException;
 
 class Sub
 {
@@ -44,19 +47,75 @@ class Sub
      * @param T $cmd
      * @param array<int, array<array-key<string|mixed[]>> $groups
      * @param array<string, Arg> $args
-     * @return T
+     * @return \Generator<mixed, mixed, mixed, T>
      * @throws \Exception
      */
-    public static function registerArgs(IArgumentable $cmd, array $groups, array $args) : IArgumentable {
-            foreach ($groups as $position => $group) foreach ($group as $id) {
-                // TODO: anonyous nad link
-                $arg = $args[$id] ?? throw new \Exception("Unknown global arg '$id'");
+    public static function registerArgs(IArgumentable $cmd, array $groups, array $args) : \Generator {
+            foreach ($groups as $position => $group) {
+                if (!is_array($args)) {
+                    throw new \Exception("Using subcommand in subcommand");
+                }
+
+               foreach ($group as $id) {
+                if (!is_array($id)) {
+                    $arg = $args[$id] ?? throw new \Exception("Unknown global arg '$id'") ;
+                } else {
+                    try {
+                        $arg = Arg::unmarshal($id);
+                    } catch (GeneralMarshalException|UnmarshalException $err) {
+                        throw new \Exception("anonymous arg '$id'", -1, $err);
+                    }
+                }
                 $arg->used = true;
                 try {
 $cmd->registerArgument($position, yield from $arg->loading->get());
                 } catch (ArgumentOrderException $err) {
                     throw new \Exception("Bad argument order", -1, $err);
                 }
+            } 
+            }
+    }
+
+    /**
+     * @param array<int, array<array-key<string|mixed[]>> $groups
+     * @param array<string, Arg> $args
+     * @param array<string, Sub> $subs
+     * @return \Generator<mixed, mixed, mixed, BaseCommand>
+     * @throws \Exception
+     */
+    public static function registerArgsAndSubs(BaseCommand $cmd, array $groups, array $args, array $subs) : \Generator {
+            foreach ($groups as $position => $group) {
+                if (!is_array($args)) {
+                    $sub = $subs[$id] ?? throw new \Exception("Unknown global subcommand '$id'");
+                } elseif (array_values($id) !== $id) {
+                    try {
+                        $sub = Sub::unmarshal($id);
+                    } catch (GeneralMarshalException|UnmarshalException $err) {
+                        throw new \Exception("anonymous subcommand '$id'", -1, $err);
+                    }
+                }
+                if (isset($sub)) {
+                    $cmd->registerSubCommand(yield from $sub->loading->get());
+                    continue;
+                }
+
+               foreach ($group as $id) {
+                if (!is_array($id)) {
+                    $arg = $args[$id] ?? throw new \Exception("Unknown global arg '$id'") ;
+                } else {
+                    try {
+                        $arg = Arg::unmarshal($id);
+                    } catch (GeneralMarshalException|UnmarshalException $err) {
+                        throw new \Exception("anonymous arg '$id'", -1, $err);
+                    }
+                }
+                $arg->used = true;
+                try {
+$cmd->registerArgument($position, yield from $arg->loading->get());
+                } catch (ArgumentOrderException $err) {
+                    throw new \Exception("Bad argument order", -1, $err);
+                }
+            } 
             }
     }
 }
