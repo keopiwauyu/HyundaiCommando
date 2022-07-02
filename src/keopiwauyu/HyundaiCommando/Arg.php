@@ -54,10 +54,7 @@ class Arg
         yield from $lock->acquire();
         $lock->release();
 
-        /**
-         * @var WantFactoryEvent<self, BaseArgument> $event
-         */
-        $event = new WantFactoryEvent($self, $args);
+        $event = new ArgFactoryEvent($self, $args);
         $event->call();
         $loaded = yield from $event->getFactory();
 

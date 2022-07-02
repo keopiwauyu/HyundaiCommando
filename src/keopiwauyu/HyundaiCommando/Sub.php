@@ -49,10 +49,7 @@ class Sub
     public static function unmarshalAndLoad(array $data, array $args) : self {
         $self = self::unmarshal($data);
         $self->loading = new Loading(function () use ($args, $self) : \Generator { // @phpstan-ignore-line fake
-        /**
-         * @var WantFactoryEvent<self, BaseSubCommand> $event
-         */
-        $event = new WantFactoryEvent($self, $args);
+        $event = new SubFactoryEvent($self, $args);
         $event->call();
         return yield from $event->getFactory();
         });
