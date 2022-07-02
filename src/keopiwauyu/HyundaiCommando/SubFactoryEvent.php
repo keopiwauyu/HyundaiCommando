@@ -7,47 +7,27 @@ namespace keopiwauyu\HyundaiCommando;
 use CortexPE\Commando\BaseSubCommand;
 use pocketmine\plugin\Plugin;
 
+/**
+ * @extends FactoryEvent<Sub, BaseSubCommand>
+ */
 class SubFactoryEvent extends FactoryEvent
 {
-    /**
+        /**
      * @param array<string, Arg> $args
      */
-    public function __construct(private Sub $wanter, array $args) {
-        parent::__construct($args);
-        $this->setFactory($this->getPlugin(), self::builtInSub($this->getWanter(), $this->getArgs()));
+    public function __construct( $wanter, array $args) {
+        $this->setFactory($this->getPlugin(), self::builtInSub($wanter, $args));
+        parent::__construct($wanter, $args);
     }
 
     public function getWanter() : Sub {
-        return $this->wanter;
+        return parent::getWanter();
     }
 
-    /**
-     * @var \Generator<mixed, mixed, mixed, BaseSubCommand>
-     */
-   private \Generator $factory;
-
-    /**
-     * @return \Generator<mixed, mixed, mixed, BaseSubCommand>
-     */
-    public function getFactory() : \Generator {
-        return $this->factory;
-    }
-
-    /**
-     * @param \Generator<mixed, mixed, mixed, BaseSubCommand> $factory
-     * @return self
-     */
-    public function setFactory(Plugin $factoryPlugin, \Generator $factory) : self {
-        $this->factoryPlugin = $factoryPlugin;
-        $this->factory = $factory;
-
-        return $this;
-    }
-
-    /**
-     * @param array<string, Arg> $args
-     * @return \Generator<mixed, mixed, mixed, BaseSubCommand>
-     */
+/**
+ * @param array<string, Arg> $args
+ * @return \Generator<mixed, mixed, mixed, BaseSubCommand>
+ */
 public static function builtInSub(Sub $sub, array $args) : \Generator {
             $subcmd = new HyundaiSubCommand($sub->name, $sub->description, $sub->aliases);
             $subcmd->setPermission($sub->permission);

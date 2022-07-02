@@ -13,41 +13,21 @@ use CortexPE\Commando\args\RawStringArgument;
 use CortexPE\Commando\args\Vector3Argument;
 use pocketmine\plugin\Plugin;
 
+/**
+ * @extends FactoryEvent<Arg, BaseArgument>
+ */
 class ArgFactoryEvent extends FactoryEvent
 {
     /**
      * @param array<string, Arg> $args
      */
-    public function __construct(private Arg $wanter, array $args) {
-        parent::__construct($args);
-        $this->setFactory($this->getPlugin(), self::builtInArgs($this->getWanter(), $this->getArgs()));
+    public function __construct(Arg $wanter, array $args) {
+        $this->setFactory($this->getPlugin(), self::builtInArgs($wanter, $args));
+        parent::__construct($wanter, $args);
     }
 
     public function getWanter() : Arg {
-        return $this->wanter;
-    }
-
-    /**
-     * @var \Generator<mixed, mixed, mixed, BaseArgument>
-     */
-   private \Generator $factory;
-
-    /**
-     * @return \Generator<mixed, mixed, mixed, BaseArgument>
-     */
-    public function getFactory() : \Generator {
-        return $this->factory;
-    }
-
-    /**
-     * @param \Generator<mixed, mixed, mixed, BaseArgument> $factory
-     * @return self
-     */
-    public function setFactory(Plugin $factoryPlugin, \Generator $factory) : self {
-        $this->factoryPlugin = $factoryPlugin;
-        $this->factory = $factory;
-
-        return $this;
+        return parent::getWanter();
     }
 
     /**

@@ -59,8 +59,8 @@ class MainClass extends PluginBase
     /**
      * @param mixed[] $array
      */
-    private function loadedDebug(array $array, string $subject) : void {
-        $this->getLogger()->debug("Loaded " . count($array) . " $subject");
+    private function loadingDebug(array $array, string $subject) : void {
+        $this->getLogger()->debug("Loading " . count($array) . " $subject");
     }
 
     public function onEnable() : void
@@ -95,7 +95,8 @@ $args[$id] = $config = Arg::unmarshalAndLoad($argData, $args, $lock);
                 return;
             }
         }
-        $this->loadedDebug($args, "global args");
+        $lock->release();
+        $this->loadingDebug($args, "global args");
 
         $subsData = @yaml_parse_file($subsPath = $this->getDataFolder() . "subcommands.yml");
         if (!is_array($subsData)) {
@@ -111,7 +112,7 @@ $subs[$id] = $config = Sub::unmarshalAndLoad($subData, $args);
                 return;
             }
         }
-        $this->loadedDebug($subs, "global subcommands");
+        $this->loadingDebug($subs, "global subcommands");
 
         @mkdir($path = $this->getDataFolder() . "cmds/");
         $files = scandir($path);

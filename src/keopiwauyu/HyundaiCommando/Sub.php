@@ -50,7 +50,6 @@ class Sub
         $self = self::unmarshal($data);
         $self->loading = new Loading(function () use ($args, $self) : \Generator { // @phpstan-ignore-line fake
         $event = new SubFactoryEvent($self, $args);
-        $event->call();
         return yield from $event->getFactory();
         });
 
@@ -70,7 +69,7 @@ class Sub
                     $sub = $subs[$group] ?? throw new \Exception("Unknown global subcommand '$group'");
                 } elseif (array_values($group) !== $group) {
                     try {
-                        $sub = Sub::unmarshal($group);
+                        $sub = self::unmarshalAndLoad($group, $args);
                     } catch (GeneralMarshalException|UnmarshalException $err) {
                         throw new \Exception("anonymous subcommand", -1, $err);
                     }

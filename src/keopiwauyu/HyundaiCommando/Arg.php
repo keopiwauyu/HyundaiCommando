@@ -55,7 +55,6 @@ class Arg
         $lock->release();
 
         $event = new ArgFactoryEvent($self, $args);
-        $event->call();
         $loaded = yield from $event->getFactory();
 
         return $loaded;
@@ -123,7 +122,7 @@ $this->checkDependsRecursive($depends, $args, []);
                     $arg = $args[$id] ?? throw new \Exception("Unknown global arg '$id'") ;
                 } else {
                     try {
-                        $arg = Arg::unmarshal($id);
+                        $arg = self::unmarshalAndLoad($id, $args, new Mutex());
                     } catch (GeneralMarshalException|UnmarshalException $err) {
                         throw new \Exception("anonymous arg", -1, $err);
                     }
@@ -132,7 +131,7 @@ $this->checkDependsRecursive($depends, $args, []);
                 try {
 $cmd->registerArgument($position, yield from $arg->loading->get());
                 } catch (ArgumentOrderException $err) {
-                    throw new \Exception("Bad argument order", -1, $err);
+                    throw new \Exception("Bad arg order", -1, $err);
                 }
             } 
             }
