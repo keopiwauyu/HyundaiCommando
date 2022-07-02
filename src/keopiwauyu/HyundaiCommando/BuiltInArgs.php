@@ -18,7 +18,6 @@ use libMarshal\exception\GeneralMarshalException;
 use libMarshal\exception\UnmarshalException;
 use function array_values;
 use function is_scalar;
-use function ksort;
 
 class BuiltInArgs
 {
