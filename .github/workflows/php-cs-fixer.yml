@@ -18,7 +18,6 @@ jobs:
               id: cpr
               if: github.event.pull_request && (github.event.pull_request.draft == false)
               with:
-                  base: ${{ github.head_ref }}
                   token: ${{ secrets.GITHUB_TOKEN }}
                   commit-message: Apply php-cs-fixer changes as of ${{ github.head.sha }}
                   title: "Fix coding standards in ${{ github.ref }} (HEAD: ${{ github.head_ref}})"
