@@ -16,6 +16,7 @@ jobs:
                 args: --config=.php-cs-fixer.php --diff
             - uses: peter-evans/create-pull-request@v4
               id: cpr
+              if: github.event.pull_request && (github.event.pull_request.draft == false)
               with:
                   base: ${{ github.head_ref }}
                   token: ${{ secrets.GITHUB_TOKEN }}
