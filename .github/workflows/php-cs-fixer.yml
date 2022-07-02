@@ -1,6 +1,4 @@
-on:
-  workflow_dispatch:
-  pull_request:
+on: [workflow_dispatch, pull_request]
 
 name: Create PRs for php-cs-fixer fixups
 
