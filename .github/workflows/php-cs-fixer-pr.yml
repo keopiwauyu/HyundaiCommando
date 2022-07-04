@@ -1,31 +1,31 @@
 on:
-  workflow_dispatch:
   pull_request:
+    types: [closed]
 
-name: Create PRs for php-cs-fixer fixups
+name: Create PRs for php-cs-fixer fixups after a PR is merged
 
 jobs:
     fix-cs:
-        name: Fix CS violations
+        name: Fix CS violations for merged PR
         runs-on: ubuntu-latest
+        if: github.event.pull_request.merged == true
         steps:
-            - uses: actions/checkout@v2     
+            - uses: actions/checkout@v2 
+                ref: ${{ github.base_ref }}
             - uses: docker://oskarstark/php-cs-fixer-ga:latest
               with:
                 args: --config=.php-cs-fixer.php --diff
             - uses: peter-evans/create-pull-request@v4
               id: cpr
-              if: github.event.pull_request && (github.event.pull_request.draft == false)
               with:
                   base: ${{ github.head_ref }}
                   token: ${{ secrets.GITHUB_TOKEN }}
                   commit-message: Apply php-cs-fixer changes as of ${{ github.head.sha }}
-                  title: Fix coding standards in ${{ github.ref }} (HEAD: ${{ github.head_ref}})
-                  branch: php-cs-fixer/${{ github.head_ref }}
+                  title: Fix coding standards in ${{ github.base_ref }} after merging ${{ github.head_ref }}
+                  branch: php-cs-fixer/${{ github.ref }}
                   assignees: ${{ github.actor }}
                   body: |
-                    Please apply these changes on the ${{ github.head_ref }} branch to fix coding standard violations.
-
+                    Please apply these changes on the ${{ github.base_ref }} branch to fix coding standard violations.
             - uses: unsplash/comment-on-pr@v1.2.0
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -33,4 +33,4 @@ jobs:
               continue-on-error: true # Will fail if not on PR
               with:
                   msg: |
-                    @${{ github.actor }} please apply the coding standard fixes from #${{ steps.cpr.outputs.pr_number }}
+                    @${{ github.actor }} Thank you for you contribution! Your changes will be reformatted (#${{ steps.cpr.outputs.pr_number }}) in order to assimilate with the repository's code style.   
