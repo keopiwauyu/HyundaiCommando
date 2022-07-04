@@ -19,14 +19,14 @@ jobs:
             - uses: peter-evans/create-pull-request@v4
               id: cpr
               with:
-                  base: ${{ github.head_ref }}
+                  base: ${{ github.base_ref }}
                   token: ${{ secrets.GITHUB_TOKEN }}
-                  commit-message: Apply php-cs-fixer changes as of ${{ github.head.sha }}
-                  title: Fix coding standards in ${{ github.base_ref }} after merging ${{ github.head_ref }}
-                  branch: php-cs-fixer/${{ github.ref }}
+                  commit-message: Apply php-cs-fixer changes as of ${{ github.base.sha }}
+                  title: Fix coding standards in ${{ github.base_ref }} after merged by ${{ github.head_ref }}
+                  branch: php-cs-fixer/${{ github.base.sha }}
                   assignees: ${{ github.actor }}
                   body: |
-                    Please apply these changes on the ${{ github.base_ref }} branch to fix coding standard violations.
+                    Please apply these changes on the ${{ github.head_ref }} branch to fix coding standard violations.
             - uses: unsplash/comment-on-pr@v1.2.0
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
