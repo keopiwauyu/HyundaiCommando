@@ -15,7 +15,6 @@ jobs:
             - uses: peter-evans/create-pull-request@v4
               id: cpr
               with:
-                  base: ${{ github.ref }}
                   token: ${{ secrets.GITHUB_TOKEN }}
                   commit-message: Apply php-cs-fixer changes as of ${{ github.sha }}
                   title: Fix coding standards in ${{ github.ref }}
