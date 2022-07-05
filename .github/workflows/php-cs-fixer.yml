@@ -20,5 +20,6 @@ jobs:
                   title: Fix coding standards in ${{ github.ref }}
                   branch: php-cs-fixer/${{ github.ref }}
                   assignees: ${{ github.actor }}
+                  labels: php-cs-fixer
                   body: |
                     Please apply these changes on the ${{ github.ref }} branch to fix coding standard violations.
