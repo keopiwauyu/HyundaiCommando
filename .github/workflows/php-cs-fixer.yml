@@ -21,4 +21,4 @@ jobs:
                   branch: php-cs-fixer/${{ github.ref }}
                   assignees: ${{ github.actor }}
                   body: |
-                    Please apply these changes on the ${{ github.head_ref }} branch to fix coding standard violations.
+                    Please apply these changes on the ${{ github.ref }} branch to fix coding standard violations.
