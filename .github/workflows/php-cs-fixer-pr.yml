@@ -21,7 +21,7 @@ jobs:
                   token: ${{ secrets.GITHUB_TOKEN }}
                   commit-message: Apply php-cs-fixer changes as of ${{ github.base.sha }}
                   title: Fix coding standards in ${{ github.base_ref }} after merged by ${{ github.head_ref }}
-                  branch: php-cs-fixer/${{ github.ref }}
+                  branch: php-cs-fixer/${{ github.sha }}
                   assignees: ${{ github.actor }}
                   body: |
                     Please apply these changes on the ${{ github.head_ref }} branch to fix coding standard violations.
