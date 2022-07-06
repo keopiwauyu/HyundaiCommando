@@ -32,4 +32,6 @@ jobs:
               #continue-on-error: true # Will fail if not on PR
               with:
                   msg: |
-                    @${{ github.actor }} Thank you for you contribution! Your changes will be reformatted (#${{ steps.cpr.outputs.pr_number }}) in order to assimilate with the repository's code style.   
+                    # Thank you for you contribution!
+                    
+                    @${{ github.actor }} Your changes will be reformatted (#${{ steps.cpr.outputs.pull-request.number }}) in order to assimilate with the repository's code style.   
