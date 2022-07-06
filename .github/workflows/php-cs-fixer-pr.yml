@@ -34,4 +34,4 @@ jobs:
                   msg: |
                     # Thank you for you contribution!
                     
-                    @${{ github.actor }} Your changes will be reformatted (#${{ steps.cpr.outputs.pull-request.number }}) in order to assimilate with the repository's code style.   
+                    @${{ github.actor }} Your changes are reformatted in #${{ steps.cpr.outputs.pull-request-number }} to assimilate with the repository's code style.   
