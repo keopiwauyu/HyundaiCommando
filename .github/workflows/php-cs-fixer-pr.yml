@@ -28,7 +28,7 @@ jobs:
             - uses: unsplash/comment-on-pr@v1.2.0
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              if: steps.cpr.outputs.pr_number
+              if: steps.cpr.outputs.pull-request-number
               #continue-on-error: true # Will fail if not on PR
               with:
                   msg: |
