@@ -64,39 +64,11 @@ class Arg
     }
 
     /**
-     * @var string[]
-     */
-    private array $depends;
-
-    /**
-     * @param string[] $depends
-     * @param array<string, self> $args
-     * @return \Generator<mixed, mixed, mixed, array<string, BaseArgument>>
-     */
-    public function setDepends(array $depends, array $args) : \Generator {
-        if (isset($this->depends)) throw new \RuntimeException("Arg depends cannot change after set");
-        $this->depends = $depends;
-$this->checkDependsRecursive($depends, $args, []);
-
-        return yield from Await::all(array_map(
-            fn(string $depend) : \Generator => yield from $args[$depend]->loading->get(),
-            $depends
-        ));
-    }
-
-    /**
-     * @param string[] $depends
      * @param array<string, self> $args
      * @param string[] $trace
-     * @throws \Exception
      */
-    private function checkDependsRecursive(array $depends, array $args, array $trace) : void {
-        foreach ($depends as $depend) {
-            $clone = $trace;
-            $clone[] = $depend;
-            if (in_array($depend, $trace, true)) throw new \Exception("Recursive arg depend ('" . implode("' => '", $clone) . "')");
-            $this->checkDependsRecursive($args[$depend]->depends, $args, $clone);
-        }
+    public function depend(self $depender, array $args, array $trace) : \Generator {
+        return $depender->loading->get();
     }
 
     public function getType() : string {
