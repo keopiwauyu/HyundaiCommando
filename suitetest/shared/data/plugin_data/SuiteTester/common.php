@@ -53,6 +53,18 @@ class Context {
 }
 
 function init_steps(Context $context) : Generator {
+    yield "register server crasher command" => function() use ($context) {
+        false && yield;
+        $context->server->getCommandMap()->register("fbp", new class("crasher", "Crash server", "/crasher", ["crash"]) extends Command {
+            /**
+             * @param mixed[] $args
+             */
+            public function execute(CommandSender $sender, string $aliasUsed, array $args) : void {
+                throw new \RuntimeException("Crasher command executed");
+            }
+        });
+    };
+
     yield "wait for HyundaiCommando to initialize" => function() use($context) {
         yield from $context->std->awaitEvent(PluginEnableEvent::class, fn(PluginEnableEvent $event) : bool => $event->getPlugin() instanceof MainClass, false, EventPriority::MONITOR, false);
     };
@@ -86,29 +98,17 @@ function init_steps(Context $context) : Generator {
             ));
         }
     };
-
-    yield "register server crasher command" => function() use ($context) {
-        false && yield;
-        $context->server->getCommandMap()->register("fbp", new class("crash", "Crash server", "/crasher", ["crash"]) extends Command {
-            /**
-             * @param mixed[] $args
-             */
-            public function execute(CommandSender $sender, string $aliasUsed, array $args) : void {
-                throw new \RuntimeException("Crasher command executed");
-            }
-        });
-    };
 }
 
 
 function crash_protector_test(Context $context, string $adminName) : Generator {
     $value = "false";
 
-    yield "execute /fbp:crash with value" => function() use($context, $adminName, $value) {
+    yield "execute /crash with value" => function() use($context, $adminName, $value) {
         yield && false;
 
         $admin = $context->server->getPlayerExact($adminName);
-        $admin->chat("/fbp:crash $value");
+        $admin->chat("/crash $value");
     };
     yield "wait error message" => function() use($context, $adminName, $value) {
         $admin = $context->server->getPlayerExact($adminName);

@@ -143,7 +143,7 @@ $globalArgs = $this->loadGlobalArgs();
             $this->getLogger()->debug("Queued command registration for '$label'");
             $generators[] = (function() use ($label, $args) : Generator {
                 $cmd = yield from HyundaiCommand::fromLabel($label, $args);
-                $cmd->logRegister();
+                $cmd->logRegister($label);
             })();
         }
         foreach ($generators as $generator) {

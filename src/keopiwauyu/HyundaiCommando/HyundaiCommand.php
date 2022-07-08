@@ -58,9 +58,6 @@ class HyundaiCommand extends BaseCommand
         $d = $this->cmd->getDescription();
         parent::__construct(MainClass::getInstance(), $this->cmd->getName(), "", $this->cmd->getAliases());
         $this->setDescription($d);
-        if ($this->cmd instanceof Command) {
-            $map->unregister($this->cmd);
-        }
     }
 
     /**
@@ -144,20 +141,22 @@ class HyundaiCommand extends BaseCommand
         $cmd->execute($sender, $aliasUsed, $newArgs);
     }
 
-    private function getFallbackPrefix() : string
+    public function getFallbackPrefix() : string
     {
         $label = $this->cmd instanceof Command ? $this->cmd->getLabel() : $this->cmd->getParent()->getLabel();
         return explode(":", $label)[0];
     }
 
-    public function simpleRegister() : void
+    public function simpleRegister(string $fallbackPrefix) : void
     {
-        $this->register(Server::getInstance()->getCommandMap());
+        $name = $this->getName();
+        $this->setLabel("$fallbackPrefix:$name");
+        $map = Server::getInstance()->getCommandMap();$map->register($fallbackPrefix, $this);
     }
 
-    public function logRegister() : void
+    public function logRegister(string $fallbackPrefix) : void
     {
-        $this->simpleRegister();
+        $this->simpleRegister($fallbackPrefix);
         MainClass::getInstance()->getLogger()->debug("Registered '" . $this->getLabel() . "'");
     }
 
@@ -212,6 +211,8 @@ class HyundaiCommand extends BaseCommand
             );
         }
         assert(isset($cmd));
+        $map->unregister($cmd);
+
         return new self($cmd, $args);
     }
 }
