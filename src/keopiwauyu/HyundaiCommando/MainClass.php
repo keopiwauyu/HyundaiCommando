@@ -64,10 +64,15 @@ class MainClass extends PluginBase
                     throw new \Exception("'$name': ". $err->getMessage());
                 }
         }
+        $this->getLogger()->debug("Global arg configs: " . var_export($configs, true));
 
         $orders = array_keys($configs);
-        foreach ($configs as $name => $config) ArgConfig::arrangeLoadOrder($configs, $orders, $name, []);
-        $this->getLogger()->debug("Global args load order: " . var_export($orders));
+        foreach ($configs as $name => $config) try {
+            ArgConfig::arrangeLoadOrder($configs, $orders, $name, []);
+        } catch (\Exception $err) {
+            throw new \Exception("'$name': " . $err->getMessage());
+        }
+        $this->getLogger()->debug("Global args load order: " . var_export($orders, true));
 
         $args = [];
         foreach ($orders as $name) {
@@ -93,7 +98,7 @@ $globalArgs = $this->loadGlobalArgs();
         } catch (\ErrorException $err) {
             throw $err;
         } catch (\Exception $err) {
-            $this->suicide("Error when loading global arg: " . $err->getMessage(), $err->getTrace());
+            $this->suicide("Error when loading global arg " . $err->getMessage(), $err->getTrace());
             return;
         }
         $this->getLogger()->debug("Loaded " . count($globalArgs) . " global args");
