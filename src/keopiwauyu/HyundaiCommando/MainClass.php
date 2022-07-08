@@ -66,7 +66,7 @@ class MainClass extends PluginBase
         }
         $this->getLogger()->debug("Global arg configs: " . var_export($configs, true));
 
-        $orders = array_keys($configs);
+        $orders = [];
         foreach ($configs as $name => $config) try {
             ArgConfig::arrangeLoadOrder($configs, $orders, $name, []);
         } catch (\Exception $err) {
@@ -77,10 +77,9 @@ class MainClass extends PluginBase
         $args = [];
         foreach ($orders as $name) {
             $config = $configs[$name];
-            $config->dependeds = array_map(
-                fn(string $depend) => $args[$depend],
-                $config->depends
-            );
+            foreach ($config->depends as $depend) {
+            $config->dependeds[$depend] = $args[$depend];
+            }
 $args[$name] = HyundaiCommand::configToArg($config);
         }
 

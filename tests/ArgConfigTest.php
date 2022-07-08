@@ -93,7 +93,7 @@ return new ArgConfig(
 		foreach ($configs as $name => $config)ArgConfig::arrangeLoadOrder($configs, $orders, $name,[]);
 		}
 
-		public function testArrangeLoadOrder() : void {
+		public function testArrangeLoadOrderIndirectDepend() : void {
 			$configs = [
 				"four" => $four = $this->configProviderWithType("Boolean"),
 				"two" => $two = $this->configProviderWithType("Boolean"),
@@ -112,6 +112,22 @@ return new ArgConfig(
 			"one",
 			"three",
 			"four"
+		], $orders);
+	}
+
+		public function testArrangeLoadOrderDirectDepend() : void {
+			$configs = [
+				"two" => $two = $this->configProviderWithType("Boolean"),
+				"one" => $one = $this->configProviderWithType("Boolean"),
+			];
+			$two->depends = ["one"];
+
+		$orders = [];
+		foreach ($configs as $name => $config)ArgConfig::arrangeLoadOrder($configs, $orders, $name,[]);
+
+		$this->assertSame([
+			"one",
+			"two"
 		], $orders);
 	}
 }
