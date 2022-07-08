@@ -25,6 +25,7 @@ use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;
+use pocketmine\utils\Utils;
 
 class MainClass extends PluginBase
 {
@@ -148,12 +149,12 @@ $globalArgs = $this->loadGlobalArgs();
     }
 
     /**
-     * @param string[] $trace
+     * @param mixed[][] $trace
      */
     private function suicide(string $description, array $trace) : void
     {
         $this->getLogger()->critical($description);
-        $this->getLogger()->debug(Utils::printableTrace($trace));
+        $this->getLogger()->debug(implode("\n", Utils::printableTrace($trace)));
         $this->getServer()->getPluginManager()->disablePlugin($this);
     }
 
