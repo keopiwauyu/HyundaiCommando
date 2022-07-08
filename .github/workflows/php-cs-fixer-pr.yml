@@ -1,0 +1,36 @@
+on:
+  pull_request:
+    types: [closed]
+
+name: Create PRs for php-cs-fixer fixups after a PR is merged
+
+jobs:
+    fix-cs:
+        name: Fix CS violations for merged PR
+        runs-on: ubuntu-latest
+        if: github.event.pull_request.merged == true
+        steps:
+            - uses: actions/checkout@v3
+            - uses: docker://oskarstark/php-cs-fixer-ga:latest
+              with:
+                args: --config=.php-cs-fixer.php --diff
+            - uses: peter-evans/create-pull-request@v4
+              id: cpr
+              with:
+                  base: ${{ github.base_ref }}
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  commit-message: Apply php-cs-fixer changes as of ${{ github.base.sha }}
+                  title: Fix coding standards in ${{ github.base_ref }} after merging ${{ github.head_ref }}
+                  branch: php-cs-fixer/${{ github.sha }}
+                  assignees: ${{ github.actor }}
+                  body: |
+                    Please apply these changes on the ${{ github.head_ref }} branch to fix coding standard violations.
+            - uses: unsplash/comment-on-pr@v1.2.0
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              if: steps.cpr.outputs.pull-request-number
+              #continue-on-error: true # Will fail if not on PR
+              with:
+                  msg: |
+                    # Thank you for your contribution!
+                    @${{ github.event.pull_request.user.login }} Your changes are reformatted in #${{ steps.cpr.outputs.pull-request-number }} to assimilate with the repository's code style and standard.
