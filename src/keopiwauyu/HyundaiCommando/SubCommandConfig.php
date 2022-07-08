@@ -13,7 +13,7 @@ class SubCommandConfig
 
     /**
      * @param string[] $aliases
-     * @param ArgConfig[] $args Not guaranteeing that index is string and is in increasing order which starts at 0.
+     * @param array<ArgConfig|string> $args Not guaranteeing that index is string and is in increasing order which starts at 0.
      */
     public function __construct(
         #[Field] public string $description, // TODO: support langusges??

@@ -167,19 +167,15 @@ class HyundaiCommand extends BaseCommand
 
     public static function resetArgTypes() : void
     {
-        $types = [
-            "Boolean" => [BuiltInArgs::class, "booleanArg"],
-            "Integer" => [BuiltInArgs::class, "integerArg"],
-            "Float" => [BuiltInArgs::class, "floatArg"],
-            "RawString" => [BuiltInArgs::class, "rawStringArg"],
-            "Text" => [BuiltInArgs::class, "textArg"],
-            "Vector3" => [BuiltInArgs::class, "vector3Arg"],
-            "BlockPosition" => [BuiltInArgs::class, "blockPositionArg"],
-            "StringEnum" => [BuiltInArgs::class, "stringEnumArg"],
-            "SubCommand" => [BuiltInArgs::class, "subCommand"]
-        ];
-
-        self::$argTypes = $types;
+        self::$argTypes["Boolean"] = [BuiltInArgs::class, "booleanArg"];
+        self::$argTypes["Integer"] = [BuiltInArgs::class, "integerArg"];
+        self::$argTypes["Float"] = [BuiltInArgs::class, "floatArg"];
+        self::$argTypes["RawString"] = [BuiltInArgs::class, "rawStringArg"];
+        self::$argTypes["Text"] = [BuiltInArgs::class, "textArg"];
+        self::$argTypes["Vector3"] = [BuiltInArgs::class, "vector3Arg"];
+        self::$argTypes["BlockPosition"] = [BuiltInArgs::class, "blockPositionArg"];
+        self::$argTypes["StringEnum"] = [BuiltInArgs::class, "stringEnumArg"];
+        self::$argTypes["SubCommand"] = [BuiltInArgs::class, "subCommand"];
     }
 
     /**

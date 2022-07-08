@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace keopiwauyu\HyundaiCommando;
 
+use CortexPE\Commando\BaseSubCommand;
 use CortexPE\Commando\PacketHooker;
 use CortexPE\Commando\args\BaseArgument;
 use Generator;
@@ -41,7 +42,7 @@ class MainClass extends PluginBase
     }
 
     /**
-     * @return array<string, BaseArgument|BaseSubCommand>
+     * @return array<BaseArgument|BaseSubCommand>
      * @throws \Exception
      */
     private function loadGlobalArgs() : array {
@@ -50,13 +51,14 @@ class MainClass extends PluginBase
             return [];
         }
         $data = @yaml_parse_file($path);
-        if (!is_array($args)) {
+        if (!is_array($data)) {
             throw new \Exception("yaml_parse_file($path) result is not array");
         }
 
+        $configs = [];
         foreach ($data as $name => $datum) {
                 try {
-                    $configs[$name] = ArgConfig::unmarshal($v);
+                    $configs[$name] = ArgConfig::unmarshal($datum);
                 } catch (GeneralMarshalException|UnmarshalException $err) {
                     throw new \Exception("'$name': ". $err->getMessage());
                 }
@@ -85,7 +87,7 @@ $args[$name] = HyundaiCommand::configToArg($config);
         $this->std = AwaitStd::init($this);
 
         try {
-$globalArgs = loadGlobalArgs();
+$globalArgs = $this->loadGlobalArgs();
         } catch (\Exception $err) {
             $this->suicide("Error when loading global arg " . $err->getMessage());
             return;

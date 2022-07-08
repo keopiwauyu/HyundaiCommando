@@ -19,7 +19,7 @@ class ArgConfigParser implements ArrayParseable
     {
         $args = [];
         foreach ($value as $k => $v) {
-            $args[$k] = is_string($v) ? $v : ArgConfig::unmarshal($v);
+            $args[$k] = !is_array($v) ? (string)$v : ArgConfig::unmarshal($v);
         }
 
         return $args;

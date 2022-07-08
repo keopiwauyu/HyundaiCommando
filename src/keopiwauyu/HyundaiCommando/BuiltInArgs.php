@@ -23,79 +23,57 @@ use function ksort;
 class BuiltInArgs
 {
 
-    /**
-     * @param array<string, BaseArgument|BaseSubCommand> $depends
-     */
     public static function booleanArg(ArgConfig $config) : BaseArgument
     {
         return new BooleanArgument($config->name, $config->optional);
     }
 
-    /**
-     * @param array<string, BaseArgument|BaseSubCommand> $depends
-     */
     public static function integerArg(ArgConfig $config) : BaseArgument
     {
         return new IntegerArgument($config->name, $config->optional);
     }
 
-    /**
-     * @param array<string, BaseArgument|BaseSubCommand> $depends
-     */
     public static function floatArg(ArgConfig $config) : BaseArgument
     {
         return new FloatArgument($config->name, $config->optional);
     }
 
-    /**
-     * @param array<string, BaseArgument|BaseSubCommand> $depends
-     */
     public static function rawStringArg(ArgConfig $config) : BaseArgument
     {
         return new RawStringArgument($config->name, $config->optional);
     }
 
-    /**
-     * @param array<string, BaseArgument|BaseSubCommand> $depends
-     */
     public static function textArg(ArgConfig $config) : BaseArgument
     {
         return new TextArgument($config->name, $config->optional);
     }
 
-    /**
-     * @param array<string, BaseArgument|BaseSubCommand> $depends
-     */
     public static function vector3Arg(ArgConfig $config) : BaseArgument
     {
         return new Vector3Argument($config->name, $config->optional);
     }
 
-    /**
-     * @param array<string, BaseArgument|BaseSubCommand> $depends
-     */
     public static function blockPositionArg(ArgConfig $config) : BaseArgument
     {
         return new BlockPositionArgument($config->name, $config->optional);
     }
 
     /**
-     * @param array<string, BaseArgument|BaseSubCommand> $depends
      * @throws RegistrationException
      */
-    public static function stringEnumArgument(ArgConfig $config) : BaseArgument
+    public static function stringEnumArg(ArgConfig $config) : BaseArgument
     {
+        $name = $config->name;
         foreach ($config->other as $v) {
             if (!is_scalar($v)) {
                 throw new RegistrationException("Other config of string enum arg '$name' is not array<int|string, scalar>");
             }
         }
 
-        throw new \RegistrationException("String enum arg is working in progress");
+        throw new RegistrationException("String enum arg is working in progress");
     }
 
     /**
-     * @param array<string, BaseArgument|BaseSubCommand> $depends
      * @throws RegistrationException Subcommand cannot contain another subcommand.
      */
     public static function subCommand(ArgConfig $config) : BaseSubCommand
@@ -121,7 +99,6 @@ class BuiltInArgs
     }
 
     /**
-     * @param array<string, BaseArgument|BaseSubCommand> $depends
      * @throws RegistrationException Subcommand cannot contain another subcommand.
      */
     public static function subCommandNoLink(ArgConfig $config) : BaseSubCommand
@@ -143,9 +120,9 @@ class BuiltInArgs
             if (is_string($argConfig)) $arg = $config->getDepend($argConfig);
             else {
             $arg = HyundaiCommand::configToArg($argConfig);
+            }
             if ($arg instanceof BaseSubCommand) {
                 throw new RegistrationException("Subcommand '$name' cannot contain another subcommand");
-            }
             }
             try {
                 $sub->registerArgument($i, $arg);
