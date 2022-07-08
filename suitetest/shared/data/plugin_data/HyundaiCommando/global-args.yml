@@ -5,7 +5,7 @@ global-sub:
   depends: [global-arg]
   other: 
       description: 피가 흘러도 한 걸음씩 간다 
-      permission: 피가 흘러도 한 걸음씩 간다 
+      permission: hyundai.commando
       aliases: []
       args:
         0:

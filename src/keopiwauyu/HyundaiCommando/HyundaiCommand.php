@@ -61,7 +61,6 @@ class HyundaiCommand extends BaseCommand
         if ($this->cmd instanceof Command) {
             $map->unregister($this->cmd);
         }
-        $map->register($this->getFallbackPrefix(), $this);
     }
 
     /**

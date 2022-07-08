@@ -101,20 +101,20 @@ function init_steps(Context $context) : Generator {
 }
 
 
-function crasher_protector_test(Context $context, string $adminName) : Generator {
+function crash_protector_test(Context $context, string $adminName) : Generator {
     $value = "false";
 
-    yield "wait error message" => function() use($context, $adminName) {
+    yield "execute /fbp:crash with value" => function() use($context, $adminName, $value) {
+        yield && false;
+
+        $admin = $context->server->getPlayerExact($adminName);
+        $admin->chat("/fbp:crash $value");
+    };
+    yield "wait error message" => function() use($context, $adminName, $value) {
         $admin = $context->server->getPlayerExact($adminName);
 
         yield from Await::all([
             $context->awaitMessage($admin, "Invalid value '$value' for argument #1"),
         ]);
-    };
-    yield "execute /fbp:crash with value" => function() use($context, $adminName) {
-        yield && false;
-
-        $admin = $context->server->getPlayerExact($adminName);
-        $admin->chat("/fbp:crash $value");
     };
 }

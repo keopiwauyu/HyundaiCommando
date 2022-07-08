@@ -91,8 +91,7 @@ class BuiltInArgs
                     $args[] = $arg; // Commando very weird??? hmm
                 }
             }
-            $link = new HyundaiCommand($sub, $args);
-            $link->logRegister();
+            $sub->link = new HyundaiCommand($sub, $args);
         }
 
         return $sub;

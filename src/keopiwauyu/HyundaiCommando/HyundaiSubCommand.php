@@ -12,6 +12,7 @@ use function array_unshift;
 class HyundaiSubCommand extends BaseSubCommand
 {
     public SubCommandConfig $config;
+    public ?HyundaiCommand $link = null;
 
     public function getParent() : BaseCommand
     {
@@ -19,6 +20,7 @@ class HyundaiSubCommand extends BaseSubCommand
     }
     protected function prepare() : void
     {
+        if (isset($this->link)) $this->link->logRegister();
     }
 
     /**
