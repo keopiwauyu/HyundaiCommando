@@ -33,4 +33,4 @@ jobs:
               with:
                   msg: |
                     # Thank you for your contribution!
-                    @${{ github.actor }} Your changes are reformatted in #${{ steps.cpr.outputs.pull-request-number }} to assimilate with the repository's code style and standard.
+                    @${{ github.event.pull_request.user.login }} Your changes are reformatted in #${{ steps.cpr.outputs.pull-request-number }} to assimilate with the repository's code style and standard.
