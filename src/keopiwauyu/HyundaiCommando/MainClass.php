@@ -72,7 +72,7 @@ class MainClass extends PluginBase
         foreach ($orders as $name) {
             $config = $configs[$name];
             $config->dependeds = array_map(
-                fn(string $depend) => $args[$depend],
+                fn(string $depend) => $globalArgs[$depend],
                 $config->depends
             );
 $args[$name] = HyundaiCommand::configToArg($config);
@@ -92,6 +92,8 @@ $globalArgs = $this->loadGlobalArgs();
         } catch (\Exception $err) {
             $this->suicide("Error when loading global arg: " . $err->getMessage(), $err->getTrace());
             return;
+        } catch (\ErrorException $err) {
+            throw $err;
         }
         $this->getLogger()->debug("Loaded " . count($globalArgs) . " global args");
         
