@@ -14,7 +14,8 @@ global-sub:
           name: 우리의 자율 위해
           depends: []
           other: []
-        1: global-arg
+        10: global-arg
+      link: true
 
 global-arg:
   type: Integer

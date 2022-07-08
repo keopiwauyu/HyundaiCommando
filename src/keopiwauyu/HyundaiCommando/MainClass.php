@@ -89,7 +89,7 @@ $args[$name] = HyundaiCommand::configToArg($config);
         try {
 $globalArgs = $this->loadGlobalArgs();
         } catch (\Exception $err) {
-            $this->suicide("Error when loading global arg " . $err->getMessage());
+            $this->suicide("Error when loading global arg: " . $err->getMessage(), $err->getTrace());
             return;
         }
         $this->getLogger()->debug("Loaded " . count($globalArgs) . " global args");
@@ -105,7 +105,7 @@ $globalArgs = $this->loadGlobalArgs();
             $errTemplate = "Error when parsing $path: ";
             $data = yaml_parse_file($path . $file);
             if (!is_array($data)) {
-                $this->suicide("yaml_parse_file($path" . "$file) result is not array");
+                $this->suicide("yaml_parse_file($path" . "$file) result is not array", Utils::currentTrace());
                 return;
             }
             foreach ($data as $k => $v) {
@@ -113,20 +113,20 @@ $globalArgs = $this->loadGlobalArgs();
                 try {
                     $config = ArgConfig::unmarshal($v);
                 } catch (GeneralMarshalException|UnmarshalException $err) {
-                    $this->suicide($errTemplate . $err->getMessage());
+                    $this->suicide($errTemplate . $err->getMessage(), $err->getTrace());
                     return;
                 }
                 try {
                     $arg = HyundaiCommand::configToArg($config);
                 } catch (RegistrationException $err) {
-                    $this->suicide("Error when parsing argument $k in command $label: " . $err->getMessage());
+                    $this->suicide("Error when parsing argument $k in command $label: " . $err->getMessage(), $err->getTrace());
                     return;
                 }
             }
             else {
                 $arg = $globalArgs[$v] ?? null;
                 if ($arg === null) {
-                    $this->suicide("Unknown global arg '$v'");
+                    $this->suicide("Unknown global arg '$v'", Utils::currentTrace());
                     return;
                 }
             }
@@ -147,9 +147,13 @@ $globalArgs = $this->loadGlobalArgs();
         }
     }
 
-    private function suicide(string $description) : void
+    /**
+     * @param string[] $trace
+     */
+    private function suicide(string $description, array $trace) : void
     {
         $this->getLogger()->critical($description);
+        $this->getLogger()->debug(Utils::printableTrace($trace));
         $this->getServer()->getPluginManager()->disablePlugin($this);
     }
 
