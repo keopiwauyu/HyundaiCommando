@@ -66,7 +66,7 @@ class MainClass extends PluginBase
         }
 
         $orders = array_keys($configs);
-        foreach ($configs as $name => $config) ArgConfig::arrangeLoadOrder($configs, $orders, $config->name, []);
+        foreach ($configs as $name => $config) ArgConfig::arrangeLoadOrder($configs, $orders, $name, []);
 
         $args = [];
         foreach ($orders as $name) {
