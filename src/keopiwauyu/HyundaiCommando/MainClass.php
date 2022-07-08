@@ -111,6 +111,7 @@ $globalArgs = $this->loadGlobalArgs();
             ksort($data);
             $data = array_values($data);
             foreach ($data as $k => $v) {
+                if (is_array($v)) {
                 try {
                     $config = ArgConfig::unmarshal($v);
                 } catch (GeneralMarshalException|UnmarshalException $err) {
@@ -123,7 +124,14 @@ $globalArgs = $this->loadGlobalArgs();
                     $this->suicide("Error when parsing argument $k in command $label: " . $err->getMessage());
                     return;
                 }
-
+            }
+            else {
+                $arg = $globalArgs[$v] ?? null;
+                if ($arg === null) {
+                    $this->suicide("Unknown global arg '$v'");
+                    return;
+                }
+            }
                 $args[$k] = $arg;
             }
             $this->getLogger()->debug("Queued command registration for '$label'");
