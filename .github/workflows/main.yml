@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  phpstan:
     name: PHPStan analysis
     runs-on: ubuntu-latest
     strategy:
@@ -37,3 +37,17 @@ jobs:
 
       - name: Run PHPStan
         run: vendor/bin/phpstan analyze
+  suites:
+    name: suite tests
+    needs: [phpstan]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        suite-name:
+          - late-registration
+        pocketmine-version:
+          - "4" # latest ??
+          - "4.0.0"
+    steps:
+      - uses: actions/checkout@v2
+      - run: make suitetest/cases/${{matrix.suite-name}} DIFF="diff -y" POCKETMINE_VERSION=${{matrix.pocketmine-version}}
