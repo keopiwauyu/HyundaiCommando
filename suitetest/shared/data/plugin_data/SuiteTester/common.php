@@ -97,7 +97,7 @@ function init_steps(Context $context) : Generator {
                 throw new \RuntimeException("Crasher command executed");
             }
         });
-    }
+    };
 }
 
 
