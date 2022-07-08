@@ -67,12 +67,13 @@ class MainClass extends PluginBase
 
         $orders = array_keys($configs);
         foreach ($configs as $name => $config) ArgConfig::arrangeLoadOrder($configs, $orders, $name, []);
+        $this->getLogger()->debug("Global args load order: " . var_export($orders));
 
         $args = [];
         foreach ($orders as $name) {
             $config = $configs[$name];
             $config->dependeds = array_map(
-                fn(string $depend) => $globalArgs[$depend],
+                fn(string $depend) => $args[$depend],
                 $config->depends
             );
 $args[$name] = HyundaiCommand::configToArg($config);
@@ -89,11 +90,11 @@ $args[$name] = HyundaiCommand::configToArg($config);
 
         try {
 $globalArgs = $this->loadGlobalArgs();
+        } catch (\ErrorException $err) {
+            throw $err;
         } catch (\Exception $err) {
             $this->suicide("Error when loading global arg: " . $err->getMessage(), $err->getTrace());
             return;
-        } catch (\ErrorException $err) {
-            throw $err;
         }
         $this->getLogger()->debug("Loaded " . count($globalArgs) . " global args");
         
