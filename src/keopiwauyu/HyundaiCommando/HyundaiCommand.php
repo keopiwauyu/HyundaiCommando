@@ -27,7 +27,7 @@ class HyundaiCommand extends BaseCommand
 {
 
     /**
-     * @param array<int, BaseArgument|BaseSubCommand> $args
+     * @param array<BaseArgument|BaseSubCommand> $args
      */
     public function __construct(private Command|HyundaiSubCommand $cmd, array $args)
     {
@@ -45,6 +45,9 @@ class HyundaiCommand extends BaseCommand
 
             return true;
         });
+        ksort($args);
+        $args = array_values($args);
+
         /**
          * @var BaseArgument[] $args
          */
@@ -193,7 +196,7 @@ class HyundaiCommand extends BaseCommand
     /**
      * Get command from its label and make it hyundai.
      * Wait until it gets registered if it is not.
-     * @param array<int, BaseArgument|BaseSubCommand> $args
+     * @param array<BaseArgument|BaseSubCommand> $args
      * @return Generator<mixed, mixed, mixed, HyundaiCommand>
      */
     public static function fromLabel(string $label, array $args) : Generator

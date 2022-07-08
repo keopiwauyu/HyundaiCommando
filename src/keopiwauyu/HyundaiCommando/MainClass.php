@@ -108,8 +108,6 @@ $globalArgs = $this->loadGlobalArgs();
                 $this->suicide("yaml_parse_file($path" . "$file) result is not array");
                 return;
             }
-            ksort($data);
-            $data = array_values($data);
             foreach ($data as $k => $v) {
                 if (is_array($v)) {
                 try {
