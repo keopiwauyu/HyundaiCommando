@@ -107,8 +107,11 @@ function crash_protector_test(Context $context, string $adminName) : Generator {
     yield "execute /crash with value" => function() use($context, $adminName, $value) {
         false && yield;
 
+        Await::f2c(function() use ($context, $adminName, $value) : \Generator {
+            yield from $context->std->sleep(0);
         $admin = $context->server->getPlayerExact($adminName);
         $admin->chat("/crash $value");
+        });
     };
     yield "wait error message" => function() use($context, $adminName, $value) {
         $admin = $context->server->getPlayerExact($adminName);
