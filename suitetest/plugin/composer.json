@@ -4,7 +4,7 @@
   "minimum-stability": "dev",
   "require": {
     "pocketmine/pocketmine-mp": "4.0.0",
-    "sof3/await-generator": "^3.1.0",
+    "sof3/await-generator": "^3.4.0",
     "sof3/await-std": "dev-event-rewrite"
   },
   "license": "Apache-2.0",
