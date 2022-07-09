@@ -134,7 +134,7 @@ class MainClass extends PluginBase
                     try {
                         $arg = HyundaiCommand::configToArg($config);
                     } catch (RegistrationException $err) {
-                        $this->suicide("Error when parsing argument $k in command $label: " . $err->getMessage(), $err->getTrace());
+                        $this->suicide("Error when parsing argument '$k' in command '$label' (or one of its subcommand): " . $err->getMessage(), $err->getTrace());
                         return;
                     }
                 } else {
