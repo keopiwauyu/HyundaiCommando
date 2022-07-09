@@ -19,7 +19,7 @@ jobs:
               with:
                   base: ${{ github.base_ref }}
                   token: ${{ secrets.GITHUB_TOKEN }}
-                  commit-message: Apply php-cs-fixer changes as of ${{ github.base.sha }}
+                  commit-message: Apply php-cs-fixer changes as of ${{ github.sha }}
                   title: Fix coding standards in ${{ github.base_ref }} after merging ${{ github.head_ref }}
                   branch: php-cs-fixer/${{ github.sha }}
                   assignees: ${{ github.actor }}
