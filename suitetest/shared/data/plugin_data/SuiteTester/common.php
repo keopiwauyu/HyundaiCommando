@@ -1,5 +1,6 @@
 <?php
 
+use SOFe\AwaitGenerator\Channel;
 use SOFe\AwaitStd\AwaitStd;
 use SOFe\SuiteTester\Await;
 use SOFe\SuiteTester\Main;
@@ -32,23 +33,40 @@ class Context {
     public $std;
     public Plugin $plugin;
     public Server $server;
+    /**
+     * @var Channel<PlayerReceiveMessageEvent>
+     */
+    public Channel $messages;
 
     public function __construct() {
         $this->std = Main::$std;
         $this->plugin = Main::getInstance();
         $this->server = Server::getInstance();
+        $this->messages = new Channel();
     }
 
-    public function awaitMessage(Player $who, string $messageSubstring, ...$args) : Generator {
+    public function expectMessage(Player $who, string $messageSubstring, ...$args) : void {
+        Await::f2c(function() use ($who, $messageSubstring, $args) : \Generator {
         $expect = strtolower(sprintf($messageSubstring, ...$args));
-        $this->server->getLogger()->debug("Waiting for message to {$who->getName()} " . json_encode($expect));
-        return yield from $this->std->awaitEvent(
+        $this->server->getLogger()->debug("Testing for message to {$who->getName()} " . json_encode($expect));
+        $event = yield from $this->std->awaitEvent(
             event: PlayerReceiveMessageEvent::class,
             eventFilter: fn($event) => $event->player === $who && str_contains(strtolower($event->message), $expect),
             consume: false,
             priority: EventPriority::MONITOR,
             handleCancelled: false,
         );
+        $this->messages->sendWithoutWait($event);
+        });
+    }
+
+    /**
+     * @return \Generator<mixed, mixed, mixed, PlayerReceiveMessageEvent[]>
+     */
+    public function awaitMessages() : \Generator {
+        $m = [];
+        for ($i=0; $i<$this->messages->getSendQueueSize(); $i++) $m[] = yield from $this->messages->receive();
+        return $m;
     }
 }
 
@@ -104,17 +122,19 @@ function init_steps(Context $context) : Generator {
 function crash_protector_test(Context $context, string $adminName) : Generator {
     $value = "false";
 
+    yield "expect error message" => function() use($context, $adminName, $value) {
+        false && yield;
+
+        $admin = $context->server->getPlayerExact($adminName);
+        $context->expectMessage($admin, "Invalid value '$value' for argument #1");
+    };
     yield "execute /crash with value" => function() use($context, $adminName, $value) {
         false && yield;
 
         $admin = $context->server->getPlayerExact($adminName);
         $admin->chat("/crash $value");
     };
-    yield "wait error message" => function() use($context, $adminName, $value) {
-        $admin = $context->server->getPlayerExact($adminName);
-
-        yield from Await::all([
-            $context->awaitMessage($admin, "Invalid value '$value' for argument #1"),
-        ]);
+    yield "await messages" => function() use ($context) {
+        yield from $context->awaitMessages();
     };
 }
