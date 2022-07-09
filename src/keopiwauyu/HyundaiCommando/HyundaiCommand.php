@@ -18,10 +18,12 @@ use ReflectionClass;
 use function array_filter;
 use function array_merge;
 use function array_unshift;
+use function array_values;
 use function assert;
 use function explode;
 use function is_bool;
 use function is_scalar;
+use function ksort;
 
 class HyundaiCommand extends BaseCommand
 {
@@ -151,7 +153,8 @@ class HyundaiCommand extends BaseCommand
     {
         $name = $this->getName();
         $this->setLabel("$fallbackPrefix:$name");
-        $map = Server::getInstance()->getCommandMap();$map->register($fallbackPrefix, $this);
+        $map = Server::getInstance()->getCommandMap();
+        $map->register($fallbackPrefix, $this);
     }
 
     public function logRegister(string $fallbackPrefix) : void

@@ -18,11 +18,11 @@ use libMarshal\exception\GeneralMarshalException;
 use libMarshal\exception\UnmarshalException;
 use function array_values;
 use function is_scalar;
+use function is_string;
 use function ksort;
 
 class BuiltInArgs
 {
-
     public static function booleanArg(ArgConfig $config) : BaseArgument
     {
         return new BooleanArgument($config->name, $config->optional);
@@ -116,9 +116,10 @@ class BuiltInArgs
         ksort($subConfig->args);
         $subConfig->args = array_values($subConfig->args);
         foreach ($subConfig->args as $i => $argConfig) {
-            if (is_string($argConfig)) $arg = $config->getDepend($argConfig);
-            else {
-            $arg = HyundaiCommand::configToArg($argConfig);
+            if (is_string($argConfig)) {
+                $arg = $config->getDepend($argConfig);
+            } else {
+                $arg = HyundaiCommand::configToArg($argConfig);
             }
             if ($arg instanceof BaseSubCommand) {
                 throw new RegistrationException("Subcommand '$name' cannot contain another subcommand");

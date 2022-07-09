@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace keopiwauyu\HyundaiCommando;
 
-use CortexPE\Commando\BaseCommand;
 use CortexPE\Commando\BaseSubCommand;
-use function array_unshift;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
+use RuntimeException;
+use function array_unshift;
 
 class HyundaiSubCommand extends BaseSubCommand
 {
@@ -21,15 +21,21 @@ class HyundaiSubCommand extends BaseSubCommand
         return $this->hyundaiParent;
     }
 
-    public function setParent(Command $hyundaiParent) : void {
-        if (!$hyundaiParent instanceof HyundaiCommand) throw new \RuntimeException("HyundaiSubCommand must have a HyundaiCommand parent");
+    public function setParent(Command $hyundaiParent) : void
+    {
+        if (!$hyundaiParent instanceof HyundaiCommand) {
+            throw new RuntimeException("HyundaiSubCommand must have a HyundaiCommand parent");
+        }
         $this->hyundaiParent = $hyundaiParent;
 
-        if (isset($this->link)) $this->link->logRegister($this->getParent()->getFallbackPrefix());
+        if (isset($this->link)) {
+            $this->link->logRegister($this->getParent()->getFallbackPrefix());
+        }
     }
 
     protected function prepare() : void
-    {}
+    {
+    }
 
     /**
      * @param mixed[] $args
