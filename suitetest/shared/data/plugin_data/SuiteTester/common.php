@@ -111,6 +111,7 @@ function crash_protector_test(Context $context, string $adminName) : Generator {
         $admin->chat("/crash $value");
     };
     yield "wait error message" => function() use($context, $adminName, $value) {
+        yield && false;
         $admin = $context->server->getPlayerExact($adminName);
 
         //yield from Await::all([
