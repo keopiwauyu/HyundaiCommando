@@ -12,24 +12,26 @@ use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\event\EventPriority;
 use pocketmine\event\player\PlayerLoginEvent;
-use pocketmine\lang\Translatable;
 use pocketmine\math\Vector3;
 use pocketmine\Server;
 use ReflectionClass;
 use function array_filter;
 use function array_merge;
+use function array_unshift;
+use function array_values;
 use function assert;
 use function explode;
 use function is_bool;
 use function is_scalar;
+use function ksort;
 
 class HyundaiCommand extends BaseCommand
 {
 
     /**
-     * @param array<int, BaseArgument|BaseSubCommand> $args
+     * @param array<BaseArgument|BaseSubCommand> $args
      */
-    public function __construct(private Command $cmd, array $args)
+    public function __construct(private Command|HyundaiSubCommand $cmd, array $args)
     {
         $map = Server::getInstance()->getCommandMap();
         $perm = $this->cmd->getPermission();
@@ -45,6 +47,9 @@ class HyundaiCommand extends BaseCommand
 
             return true;
         });
+        ksort($args);
+        $args = array_values($args);
+
         /**
          * @var BaseArgument[] $args
          */
@@ -55,8 +60,6 @@ class HyundaiCommand extends BaseCommand
         $d = $this->cmd->getDescription();
         parent::__construct(MainClass::getInstance(), $this->cmd->getName(), "", $this->cmd->getAliases());
         $this->setDescription($d);
-        $map->unregister($this->cmd);
-        $map->register($this->getFallbackPrefix(), $this);
     }
 
     /**
@@ -75,7 +78,13 @@ class HyundaiCommand extends BaseCommand
         if ($registerArgs || $subCommand) {
             $args = [];
             foreach (ArgConfigTest::ARG_FACTORY_TO_CLASS as $type => $class) {
-                $args[] = self::$argTypes[$type]($type, true, []); // TODO: found bug !!! break my ph untt test
+                $args[] = self::$argTypes[$type](new ArgConfig(
+                    type: $type,
+                    optional: true,
+                    name: $class,
+                    depends: [],
+                    other: []
+                )); // TODO: found bug !!! break my ph untt test
             }
         }
 
@@ -122,51 +131,59 @@ class HyundaiCommand extends BaseCommand
                 default => [$arg]
             });
         }
+        if ($this->cmd instanceof Command) {
+            $cmd = $this->cmd;
+        } else {
+            $cmd = $this->cmd->getParent();
+            array_unshift($newArgs, $this->cmd->getName());
+        }
         /**
          * @var string[] $newArgs
          */
-        $this->cmd->execute($sender, $aliasUsed, $newArgs);
+        $cmd->execute($sender, $aliasUsed, $newArgs);
     }
 
-    private function getFallbackPrefix() : string
+    public function getFallbackPrefix() : string
     {
-        $label = $this->cmd->getLabel();
+        $label = $this->cmd instanceof Command ? $this->cmd->getLabel() : $this->cmd->getParent()->getLabel();
         return explode(":", $label)[0];
     }
 
-    public function simpleRegister() : void
+    public function simpleRegister(string $fallbackPrefix) : void
     {
-        $this->register(Server::getInstance()->getCommandMap());
+        $name = $this->getName();
+        $this->setLabel("$fallbackPrefix:$name");
+        $map = Server::getInstance()->getCommandMap();
+        $map->register($fallbackPrefix, $this);
+    }
+
+    public function logRegister(string $fallbackPrefix) : void
+    {
+        $this->simpleRegister($fallbackPrefix);
+        MainClass::getInstance()->getLogger()->debug("Registered '" . $this->getLabel() . "'");
     }
 
     /**
-     * Resets on plugin enable.
-     * @see MainClass::onEnable()
-     * @var array<string, callable(string $name, bool $optional, mixed[] $other) : (BaseArgument|BaseSubCommand)>
+     * @see MainClass::onEnable() Resets on plugin enable.
+     * @var array<string, callable(ArgConfig) : (BaseArgument|BaseSubCommand)>
      */
     public static array $argTypes;
 
     public static function resetArgTypes() : void
     {
-        $types = [
-            "Boolean" => [BuiltInArgs::class, "booleanArg"],
-            "Integer" => [BuiltInArgs::class, "integerArg"],
-            "Float" => [BuiltInArgs::class, "floatArg"],
-            "RawString" => [BuiltInArgs::class, "rawStringArg"],
-            "Text" => [BuiltInArgs::class, "textArg"],
-            "Vector3" => [BuiltInArgs::class, "vector3Arg"],
-            "BlockPosition" => [BuiltInArgs::class, "blockPositionArg"],
-            "StringEnum" => [BuiltInArgs::class, "stringEnumArg"],
-            "SubCommand" => [BuiltInArgs::class, "subCommand"]
-        ];
-        /**
-         * @var array<string, callable(string $name, bool $optional, mixed[] $other) : (BaseArgument|BaseSubCommand)> $types
-         */
-        self::$argTypes = $types;
+        self::$argTypes["Boolean"] = [BuiltInArgs::class, "booleanArg"];
+        self::$argTypes["Integer"] = [BuiltInArgs::class, "integerArg"];
+        self::$argTypes["Float"] = [BuiltInArgs::class, "floatArg"];
+        self::$argTypes["RawString"] = [BuiltInArgs::class, "rawStringArg"];
+        self::$argTypes["Text"] = [BuiltInArgs::class, "textArg"];
+        self::$argTypes["Vector3"] = [BuiltInArgs::class, "vector3Arg"];
+        self::$argTypes["BlockPosition"] = [BuiltInArgs::class, "blockPositionArg"];
+        self::$argTypes["StringEnum"] = [BuiltInArgs::class, "stringEnumArg"];
+        self::$argTypes["SubCommand"] = [BuiltInArgs::class, "subCommand"];
     }
 
     /**
-     * @throwss RegistrationException
+     * @throws RegistrationException
      */
     public static function configToArg(ArgConfig $config) : BaseArgument|BaseSubCommand
     {
@@ -174,13 +191,13 @@ class HyundaiCommand extends BaseCommand
         $name = $config->name;
         $factory = self::$argTypes[$type] ?? throw new RegistrationException("Arg '$name' has unknown type: $type");
         $name = $config->name;
-        return $factory($name, $config->optional, $config->other);
+        return $factory($config);
     }
 
     /**
      * Get command from its label and make it hyundai.
      * Wait until it gets registered if it is not.
-     * @param array<int, BaseArgument|BaseSubCommand> $args
+     * @param array<BaseArgument|BaseSubCommand> $args
      * @return Generator<mixed, mixed, mixed, HyundaiCommand>
      */
     public static function fromLabel(string $label, array $args) : Generator
@@ -197,6 +214,8 @@ class HyundaiCommand extends BaseCommand
             );
         }
         assert(isset($cmd));
+        $map->unregister($cmd);
+
         return new self($cmd, $args);
     }
 }

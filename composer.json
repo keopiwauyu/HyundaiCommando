@@ -11,7 +11,7 @@
   },
   "autoload": {
     "psr-0": {
-      "keopiwauyu\\HyundaiCommando\\": "src/keopiwauyu/HyundaiCommando/"
+    "keopiwauyu\\HyundaiCommando\\": "src"
     }
   },
   "require-dev": {

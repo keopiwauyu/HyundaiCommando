@@ -27,6 +27,6 @@ class HyundaiCommandTest extends TestCase {
 		$args = ["true", "3", "1.4587742654465", "world", "-1.4587742654465", ".0", "-.0", "100", "200", "300", "https://youtu.be/Bc8vc8Y_AYw"]; // TODO: test ~~~ in intragrated tesst
 		$cmd->execute(new FakeCommandSender(), "hello", $args);
 		$args[5] = $args[6] = "0";
-		$this->assertSame($update, $args);
+		$this->assertSame($args, $update);
 	}
 }

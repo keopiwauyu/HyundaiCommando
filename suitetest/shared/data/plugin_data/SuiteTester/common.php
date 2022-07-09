@@ -52,27 +52,35 @@ class Context {
     }
 }
 
-function waitForOnePlayerToJoin(Context $context) : \Generator {
+function init_steps(Context $context) : Generator {
+    yield "register server crasher command" => function() use ($context) {
+        false && yield;
+        $context->server->getCommandMap()->register("fbp", new class("crasher", "Crash server", "/crasher", ["crash"]) extends Command {
+            /**
+             * @param mixed[] $args
+             */
+            public function execute(CommandSender $sender, string $aliasUsed, array $args) : void {
+                throw new \RuntimeException("Crasher command executed");
+            }
+        });
+    };
+
+    yield "wait for HyundaiCommando to initialize" => function() use($context) {
+        yield from $context->std->awaitEvent(PluginEnableEvent::class, fn(PluginEnableEvent $event) : bool => $event->getPlugin() instanceof MainClass, false, EventPriority::MONITOR, false);
+    };
+
+    yield "wait for two players to join" => function() use($context) {
         $onlineCount = 0;
         foreach($context->server->getOnlinePlayers() as $player) {
             if($player->isOnline()) {
                 $onlineCount += 1;
             }
         }
-        if($onlineCount < 1) {
-            yield from $context->std->awaitEvent(PlayerJoinEvent::class, fn($_) => count($context->server->getOnlinePlayers()) === 1, false, EventPriority::MONITOR, false);
+        if($onlineCount < 2) {
+            yield from $context->std->awaitEvent(PlayerJoinEvent::class, fn($_) => count($context->server->getOnlinePlayers()) === 2, false, EventPriority::MONITOR, false);
         }
 
         yield from $context->std->sleep(10);
-    }
-
-function init_steps(Context $context) : Generator {
-    yield "wait for HyundaiCommando to initialize" => function() use($context) {
-        yield from $context->std->awaitEvent(PluginEnableEvent::class, fn(PluginEnableEvent $event) : bool => $event->getPlugin() instanceof MainClass, false, EventPriority::MONITOR, false);
-    };
-
-    yield "wait for one player to join" => function() use ($context) : \Generator {
-        yield from waitForOnePlayerToJoin($context);
     };
 
     yield "setup chat listeners" => function() use($context) {
@@ -92,27 +100,24 @@ function init_steps(Context $context) : Generator {
     };
 }
 
-function late_registration_test(Context $context, string $adminName) : Generator {
-    yield "register crasher command" => function() : \Generator {
+
+function crash_protector_test(Context $context, string $adminName) : Generator {
+    $value = "false";
+
+    yield "execute /crash with value" => function() use($context, $adminName, $value) {
         false && yield;
-        $context->server->getCommandMap()->register("fbp", new class("hello", "world", "/hello", []) extends Command {
-            public function execute(CommandSender $sender, string $aliasUsed, array $args) : void {
-                throw new \RuntimeException("Late registration failed");
-            }
+
+        Await::f2c(function() use ($context, $adminName, $value) : \Generator {
+            yield from $context->std->sleep(0);
+        $admin = $context->server->getPlayerExact($adminName);
+        $admin->chat("/crash $value");
         });
     };
-    yield "wait for another one player to join" => function() use ($context) : \Generator {
-        false && yield;
-        yield from waitForOnePlayerToJoin($context);
-    };
-    yield "wait for Commando too few args message" => function() use($context, $adminName) : \Generator {
-        false && yield;
+    yield "wait error message" => function() use($context, $adminName, $value) {
         $admin = $context->server->getPlayerExact($adminName);
-        yield from awaitMessage($admin, "§cInsufficient number of arguments given");
-    };
-    yield "run command" => function() use($context, $adminName) : \Generator {
-        false && yield;
-        $admin = $context->server->getPlayerExact($adminName);
-        $admin->chat("/fbp:hello");
+
+        yield from Await::all([
+            $context->awaitMessage($admin, "Invalid value '$value' for argument #1"),
+        ]);
     };
 }
