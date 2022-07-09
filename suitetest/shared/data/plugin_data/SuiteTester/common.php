@@ -105,7 +105,7 @@ function crash_protector_test(Context $context, string $adminName) : Generator {
     $value = "false";
 
     yield "execute /crash with value" => function() use($context, $adminName, $value) {
-        yield && false;
+        false && yield;
 
         $admin = $context->server->getPlayerExact($adminName);
         $admin->chat("/crash $value");
