@@ -102,17 +102,17 @@ function init_steps(Context $context) : Generator {
 
 
 function crash_protector_test(Context $context, string $adminName) : Generator {
-    $value = "false";
+    //$value = "false";
 
-    yield "execute /crash with value" => function() use($context, $adminName, $value) {
+    yield "execute /crash with value" => function() use($context, $adminName) {
         yield && false;
 
-        $admin = $context->server->getPlayerExact($adminName);
-        $admin->chat("/crash $value");
+        //$admin = $context->server->getPlayerExact($adminName);
+        //$admin->chat("/crash $value");
     };
-    yield "wait error message" => function() use($context, $adminName, $value) {
+    yield "wait error message" => function() use($context, $adminName) {
         yield && false;
-        $admin = $context->server->getPlayerExact($adminName);
+        //$admin = $context->server->getPlayerExact($adminName);
 
         //yield from Await::all([
             //$context->awaitMessage($admin, "Invalid value '$value' for argument #1"),
