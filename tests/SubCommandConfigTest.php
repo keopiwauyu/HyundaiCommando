@@ -57,6 +57,7 @@ return [
 		foreach ($args as &$arg) {
 			$arg["optional"] = true;
 			$arg["name"] = "고개 들면서 구호 외치면서";
+			$arg["depends"] = [];
 			$arg["other"] = $arg["type"] === "SubCommand" ? $this->setArgsInRandomIndexOrder($this->dataProvider(), false, false) : [];
 		}
 		$data["args"] = $args;
@@ -67,7 +68,7 @@ return [
 	public function testUnmarshal() : void {
 		$data = $this->setArgsInRandomIndexOrder($this->dataProvider(), false, true);
 		$config = SubCommandConfig::unmarshal($data);
-		$this->assertSame($config->marshal(), $data);
+		$this->assertSame($data, $config->marshal());
 	}
 
 	private function wrapWithArgConfigData(array $data) : array {
@@ -75,6 +76,7 @@ return [
 			"type" => "SubCommand",
 			"optional" => true,
 			"name" => "world",
+			"depends" => [],
 			"other" => $data
 		];
 	}
@@ -117,8 +119,8 @@ return [
 
 	public function testConfigToArgNormalArgAfterOptionalArg() : void {
 		$data = $this->dataProvider();
-		$data["args"][0] = ["type" => "Boolean", "name" => "자유는 다시 오길", "optional" => true, "other" => []];
-		$data["args"][1] = ["type" => "Boolean", "name" => "총알 눈앞에 지나가", "optional" => false, "other" => []];
+		$data["args"][0] = ["type" => "Boolean", "name" => "자유는 다시 오길", "optional" => true, "depends" => [], "other" => []];
+		$data["args"][1] = ["type" => "Boolean", "name" => "총알 눈앞에 지나가", "optional" => false, "depends" => [], "other" => []];
 
 		$this->expectException(RegistrationException::class);
 		HyundaiCommand::configToArg(ArgConfig::unmarshal($this->wrapWithArgConfigData($data)));

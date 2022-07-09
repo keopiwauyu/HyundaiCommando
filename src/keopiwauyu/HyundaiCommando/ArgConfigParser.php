@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace keopiwauyu\HyundaiCommando;
 
+use libMarshal\exception\GeneralMarshalException;
+use libMarshal\exception\UnmarshalException;
 use libMarshal\parser\ArrayParseable;
 
 /**
  * @template K of array-key
  * @template V of mixed
- * @implements ArrayParseable<array<K, ArgConfig>, K, V>
+ * @implements ArrayParseable<array<K, ArgConfig|string>, K, V>
  */
 class ArgConfigParser implements ArrayParseable
 {
@@ -17,10 +19,7 @@ class ArgConfigParser implements ArrayParseable
     {
         $args = [];
         foreach ($value as $k => $v) {
-            /**
-             * @var scalar[] $v
-             */
-            $args[$k] = ArgConfig::unmarshal($v);
+            $args[$k] = !is_array($v) ? (string)$v : ArgConfig::unmarshal($v);
         }
 
         return $args;
@@ -30,7 +29,7 @@ class ArgConfigParser implements ArrayParseable
     {
         $data = [];
         foreach ($value as $k => $v) {
-            $data[$k] = $v->marshal();
+$data[$k] =$v instanceof ArgConfig ? $v->marshal() : $v;
         }
 
         /**
