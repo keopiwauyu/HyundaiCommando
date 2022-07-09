@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace keopiwauyu\HyundaiCommando;
 
-use libMarshal\exception\GeneralMarshalException;
-use libMarshal\exception\UnmarshalException;
 use libMarshal\parser\ArrayParseable;
+use function is_array;
 
 /**
  * @template K of array-key
@@ -29,7 +28,7 @@ class ArgConfigParser implements ArrayParseable
     {
         $data = [];
         foreach ($value as $k => $v) {
-$data[$k] =$v instanceof ArgConfig ? $v->marshal() : $v;
+            $data[$k] = $v instanceof ArgConfig ? $v->marshal() : $v;
         }
 
         /**
