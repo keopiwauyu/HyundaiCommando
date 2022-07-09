@@ -113,8 +113,8 @@ function crash_protector_test(Context $context, string $adminName) : Generator {
     yield "wait error message" => function() use($context, $adminName, $value) {
         $admin = $context->server->getPlayerExact($adminName);
 
-        yield from Await::all([
+        //yield from Await::all([
             //$context->awaitMessage($admin, "Invalid value '$value' for argument #1"),
-        ]);
+        //]);
     };
 }
