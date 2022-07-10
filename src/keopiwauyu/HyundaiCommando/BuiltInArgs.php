@@ -94,8 +94,8 @@ class BuiltInArgs
                 $arg = $config->getDepend($argConfig);
             } else {
                 try {
-                        $argConfig->getDependsFrom($config->dependeds);
-                $arg = HyundaiCommand::configToArg($argConfig);
+                    $argConfig->getDependsFrom($config->dependeds);
+                    $arg = HyundaiCommand::configToArg($argConfig);
                 } catch (RegistrationException $err) {
                     throw new RegistrationException("Error when parsing arg '$i' in subcommand: " . $err->getMessage());
                 }

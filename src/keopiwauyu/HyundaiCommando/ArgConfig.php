@@ -68,9 +68,10 @@ class ArgConfig
      * @param array<BaseArgument|BaseSubCommand> $args
      * @throws RegistrationException
      */
-    public function getDependsFrom(array $args) : void {
-                                        foreach ($this->depends as $id => $depend) {
-$this->dependeds[$id] = $args[$id] ?? throw new RegistrationException("Unknown depend '$depend' (forget adding to 'depends'?)");
-                }
+    public function getDependsFrom(array $args) : void
+    {
+        foreach ($this->depends as $id => $depend) {
+            $this->dependeds[$id] = $args[$id] ?? throw new RegistrationException("Unknown depend '$depend' (forget adding to 'depends'?)");
+        }
     }
 }
