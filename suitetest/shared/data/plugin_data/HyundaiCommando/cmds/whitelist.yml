@@ -4,7 +4,7 @@
     name: "on"
     depends: []
     other: 
-        links: [on, wl]
+        links: ["on", wl]
         description: Turn on whitelist for the server
         permission: pocketmine.command.spawnpoint
         aliases:
@@ -16,7 +16,7 @@
     name: "off"
     depends: []
     other:
-        links: [off, wll]
+        links: ["off", wll]
         description: Turn off whitelist for the server
         permission: pocketmine.command.spawnpoint
         aliases:
