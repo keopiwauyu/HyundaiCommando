@@ -124,12 +124,9 @@ function crash_protector_test(Context $context, string $adminName) : Generator {
     };
 }
 
-function waitSpawnPointSuccessMessageAndVerifyPosition(Context $context, string $adminName) : \Generator {
+function waitSpawnPointSuccessMessageAndVerifyPosition(Context $context, string $adminName, ?Vector3 $pos) : \Generator {
         $admin = $context->server->getPlayerExact($adminName);
-        $pos = $admin->getPosition();
-                    $x = $pos->x;
-                    $y = $pos->y;
-                    $z = $pos->z;
+        $pos ??= $admin->getPosition();
 
         yield from Await::all([
             $context->awaitMessage($admin, "Set $adminName's spawn point to ($x, $y, $z)"),
@@ -138,30 +135,29 @@ function waitSpawnPointSuccessMessageAndVerifyPosition(Context $context, string 
         if (!$pos->equals($spawn)) throw new \RuntimeException("Expected spawnpoint $pos but got $spawn");
 }
 
-function tilde_position_test(Context $context, string $adminName) : Generator {
-/*       yield "execute /spawnpoint with ~~~" => function() use($context, $adminName) {
+function spawnpoint_cmd_test(Context $context, string $adminName) : Generator {
+yield "execute /spawnpoint with admin name and verify position" => function() use($context, $adminName) {
         false && yield;
 
         Await::f2c(function() use ($context, $adminName) : \Generator {
             yield from $context->std->sleep(0);
         $admin = $context->server->getPlayerExact($adminName);
-        $admin->chat("/spawnpoint '$adminName' ~~~");
+        $admin->chat("/spawnpoint '$adminName'");
         });
     }; 
-        yield "wait spawnpoint success message of ~~~ and verify position" => function() use($context, $adminName) {
-        yield from waitSpawnPointSuccessMessageAndVerifyPosition($context, $adminName);
-
+        yield "wait success message" => function() use($context, $adminName) {
+        yield from waitSpawnPointSuccessMessageAndVerifyPosition($context, $adminName, null);
     };
-*/       yield "execute /spawnpoint with admin name and ~ ~ ~ and verify position" => function() use($context, $adminName) {
+yield "execute /spawnpoint with admin name, 831.721 689.777 64.19 and verify position" => function() use($context, $adminName) {
         false && yield;
 
         Await::f2c(function() use ($context, $adminName) : \Generator {
             yield from $context->std->sleep(0);
         $admin = $context->server->getPlayerExact($adminName);
-        $admin->chat("/spawnpoint '$adminName' ~ ~ ~");
+        $admin->chat("/spawnpoint '$adminName' 831.721 689.777 64.19");
         });
     }; 
-        yield "wait success message of ~ ~ ~" => function() use($context, $adminName) {
-        yield from waitSpawnPointSuccessMessageAndVerifyPosition($context, $adminName);
+        yield "wait success message" => function() use($context, $adminName) {
+        yield from waitSpawnPointSuccessMessageAndVerifyPosition($context, $adminName, new Vector3(831.721, 689.777, 64.19));
     };
 }
