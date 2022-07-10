@@ -6,7 +6,6 @@ namespace keopiwauyu\HyundaiCommando;
 
 use CortexPE\Commando\args\BaseArgument;
 use CortexPE\Commando\BaseSubCommand;
-use Exception;
 use libMarshal\attributes\Field;
 use libMarshal\MarshalTrait;
 use function implode;
