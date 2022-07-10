@@ -15,7 +15,7 @@ global-sub:
           depends: []
           other: []
         10: global-arg
-      link: true
+      links: [global-sub, sub-link]
 
 global-arg:
   type: Integer
