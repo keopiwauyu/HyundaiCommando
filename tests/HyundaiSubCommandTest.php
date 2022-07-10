@@ -12,6 +12,7 @@ class HyundaiSubCommandTest extends TestCase {
 	public function testExecute() : void {
 		$update = [];
 		$cmd = UpdateArrayOnExecute::makeHyundai($update, false, true);
+
 		$cmd->execute(new FakeCommandSender(), "hello", ["bbb"]);
 		$this->assertSame([array_values($cmd->getSubCommands())[0]->getName()], $update);
 	}
@@ -19,7 +20,7 @@ class HyundaiSubCommandTest extends TestCase {
 		public function testExecuteRegisterArgs() : void {
 		$update = [];
 		$cmd = UpdateArrayOnExecute::makeHyundai($update, true, true);
-		$args = ["aaa", "true", "3", "1.4587742654465", "world", "-1.4587742654465", ".0", "-.0", "100", "200", "300", "https://youtu.be/Bc8vc8Y_AYw"]; // TODO: test ~~~ in intragrated tesst
+		$args = ["bbb", "true", "3", "1.4587742654465", "world", "-1.4587742654465", ".0", "-.0", "100", "200", "300", "https://youtu.be/Bc8vc8Y_AYw"]; // TODO: test ~~~ in intragrated tesst
 		$cmd->execute(new FakeCommandSender(), "hello", $args);
 
 		$args[6] = $args[7] = "0";

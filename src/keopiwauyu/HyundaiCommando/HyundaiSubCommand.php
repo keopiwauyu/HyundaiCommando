@@ -22,21 +22,24 @@ class HyundaiSubCommand extends BaseSubCommand
      * @throws RegistrationException
      */
     public function setParent(BaseCommand $parent) : void {
-        $linked = isset($this->parent);
+        $parented = isset($this->parent);
         parent::setParent($parent);
+        if ($parented) return;
 
         $links = $this->config->links;
-        if ($linked || $links === []) return;
-        if (!$parent instanceof HyundaiCommand) {
-            throw new RegistrationException("Cannot use link when subcommand is registered on cmd '" . $parent->getName() . "' which is a " . get_debug_type($parent));
+                if ($links !== [] && !$parent instanceof HyundaiCommand) {
+            throw new RegistrationException("Cannot use 'links' when subcommand is registered on cmd '" . $parent->getName() . "' which is a " . get_debug_type($parent));
         }
-            $argsss = $this->getArgumentList();
+
+                    $argsss = $parent->getArgumentList();
             $args = [];
             foreach ($argsss as $argss) {
                 foreach ($argss as $arg) {
                     $args[] = $arg; // Commando very weird??? hmm
                 }
             }
+            foreach ($args as $i => $arg) $this->registerArgument($i, $arg);
+
         foreach ($links as $link) {
             $cmd = new HyundaiCommand($this, $args, $parent);
             $cmd->logRegister();
