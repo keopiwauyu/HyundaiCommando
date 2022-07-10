@@ -62,7 +62,7 @@
     type: SubCommand
     optional: false
     name: reload
-    depends: [oakf]
+    depends: []
     other:
         description: Reload whitelist.yml in disk
         permission: pocketmine.command.spawnpoint
