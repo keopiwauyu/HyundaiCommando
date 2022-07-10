@@ -13,7 +13,10 @@ use function array_unshift;
 class HyundaiSubCommand extends BaseSubCommand
 {
     public SubCommandConfig $config;
-    public ?HyundaiCommand $link = null;
+    /**
+     * @var HyundaiCommand[]
+     */
+    public array $links = [];
     private HyundaiCommand $hyundaiParent;
 
     public function getParent() : HyundaiCommand
@@ -28,9 +31,9 @@ class HyundaiSubCommand extends BaseSubCommand
         }
         $this->hyundaiParent = $hyundaiParent;
 
-        if (isset($this->link)) {
-            $this->link->logRegister($this->getParent()->getFallbackPrefix());
-        }
+        foreach ($this->links as $link)$link->logRegister($this->getParent()->getFallbackPrefix());
+
+        parent::setParent($hyundaiParent);
     }
 
     protected function prepare() : void

@@ -24,7 +24,7 @@ return [
 				"자유는 다시 오길"
 			]
 			, "args" => [],
-			"link" => false
+			"links" => []
 ];
 	}
 
