@@ -7,7 +7,6 @@ namespace keopiwauyu\HyundaiCommando;
 use CortexPE\Commando\args\BaseArgument;
 use CortexPE\Commando\BaseSubCommand;
 use CortexPE\Commando\PacketHooker;
-use ErrorException;
 use Exception;
 use Generator;
 use libMarshal\exception\GeneralMarshalException;
@@ -149,7 +148,7 @@ class MainClass extends PluginBase
             $generators[] = HyundaiCommand::fromPrefixedName($prefixedName, $args);
         }
         foreach ($generators as $generator) {
-            Await::f2c(fn() : \Generator => (yield from $generator)->logRegister());
+            Await::f2c(fn() : Generator => (yield from $generator)->logRegister());
         }
 
         if (!PacketHooker::isRegistered()) {
