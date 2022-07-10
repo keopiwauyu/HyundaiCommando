@@ -101,9 +101,7 @@ class MainClass extends PluginBase
 
         try {
             $globalArgs = $this->loadGlobalArgs();
-        } catch (ErrorException $err) {
-            throw $err;
-        } catch (Exception $err) {
+        } catch (RegistrationException $err) {
             $this->suicide("Error when loading global arg " . $err->getMessage(), $err->getTrace());
             return;
         }
@@ -114,7 +112,7 @@ class MainClass extends PluginBase
         $files = scandir($path);
         $generators = [];
         foreach (array_diff($files !== false ? $files : [], [".", ".."]) as $file) {
-            $label = str_replace(" ", ":", trim($file, ".yml"));
+            $prefixedName = str_replace(" ", ":", trim($file, ".yml"));
             $args = [];
 
             $errTemplate = "Error when parsing $path" . "$file: ";
@@ -134,7 +132,7 @@ class MainClass extends PluginBase
                     try {
                         $arg = HyundaiCommand::configToArg($config);
                     } catch (RegistrationException $err) {
-                        $this->suicide("Error when parsing arg '$k' in command '$label': " . $err->getMessage(), $err->getTrace());
+                        $this->suicide("Error when parsing arg '$k' in command '$prefixedName': " . $err->getMessage(), $err->getTrace());
                         return;
                     }
                 } else {
@@ -146,14 +144,11 @@ class MainClass extends PluginBase
                 }
                 $args[$k] = $arg;
             }
-            $this->getLogger()->debug("Queued command registration for '$label'");
-            $generators[] = (function() use ($label, $args) : Generator {
-                $cmd = yield from HyundaiCommand::fromLabel($label, $args);
-                $cmd->logRegister($label);
-            })();
+            $this->getLogger()->debug("Queued command registration for '$prefixedName'");
+            $generators[] = HyundaiCommand::fromPrefixedName($prefixedName, $args);
         }
         foreach ($generators as $generator) {
-            Await::g2c($generator); // @phpstan-ignore-line
+            Await::f2c(fn() : \Generator => (yield from $generator)->logRegister());
         }
 
         if (!PacketHooker::isRegistered()) {

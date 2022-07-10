@@ -18,7 +18,7 @@ class FakeCommandSender implements CommandSender {
 		}
 
 	public function sendMessage(Translatable|string $message) : void {
-		var_dump("Send message to command sender",$message);
+		throw new \RuntimeException("Send message to command sender: $message");
 	}
 
 	public function getServer() : Server {
