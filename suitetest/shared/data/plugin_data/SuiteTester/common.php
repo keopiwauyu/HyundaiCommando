@@ -158,7 +158,7 @@ yield "execute /spawnpoint with admin name, 831.721 689.777 64.19 and verify pos
         $admin->chat("/spawnpoint \"$adminName\" 831.721 689.777 64.19");
         });
     }; 
-        yield "wait success message" => function() use($context, $adminName) {
+        yield "wait success message of 831.721 689.777 64.19" => function() use($context, $adminName) {
         yield from waitSpawnPointSuccessMessageAndVerifyPosition($context, $adminName, new Vector3(831.721, 689.777, 64.19));
     };
 }
