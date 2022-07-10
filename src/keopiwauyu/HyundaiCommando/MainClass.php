@@ -145,13 +145,10 @@ class MainClass extends PluginBase
                 $args[$k] = $arg;
             }
             $this->getLogger()->debug("Queued command registration for '$prefixedName'");
-            $generators[] = (function() use ($prefixedName, $args) : Generator {
-                $cmd = yield from HyundaiCommand::fromPrefixedName($prefixedName, $args);
-                $cmd->logRegister();
-            })();
+            $generators[] = HyundaiCommand::fromPrefixedName($prefixedName, $args);
         }
         foreach ($generators as $generator) {
-            Await::g2c($generator); // @phpstan-ignore-line
+            Await::f2c(fn() : \Generator => (yield from $generator)->logRegister());
         }
 
         if (!PacketHooker::isRegistered()) {
