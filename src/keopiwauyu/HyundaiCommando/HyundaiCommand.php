@@ -25,10 +25,16 @@ use pocketmine\command\CommandSender;
 use pocketmine\event\EventPriority;
 use pocketmine\event\player\PlayerLoginEvent;
 use pocketmine\math\Vector3;
+use pocketmine\plugin\Plugin;
 
 class HyundaiCommand extends BaseCommand
 {
     private string $prefixedName;
+
+    /**
+     * @internal FOT TESTING !!!! ONLY !!!!
+     */
+    public static Plugin $testPlugin;
 
     /**
      * @param array<BaseArgument|BaseSubCommand> $args
@@ -37,7 +43,6 @@ class HyundaiCommand extends BaseCommand
     {
         $this->prefixedName = $prefixedName instanceof self ? $prefixedName->prefixedName : $prefixedName;
 
-        $map = Server::getInstance()->getCommandMap();
         $perm = $this->cmd->getPermission();
         if ($perm !== null) {
             $this->setPermission($perm);
@@ -61,57 +66,8 @@ class HyundaiCommand extends BaseCommand
             $this->registerArgument($i++, $arg);
         }
 
-        parent::__construct(MainClass::getInstance(), explode(":", $this->prefixedName)[1] ?? throw new \RuntimeException("Name '$prefixedName' is not prefixed"), "", $this->cmd->getAliases());
+        parent::__construct(self::$testPlugin ?? MainClass::getInstance(), explode(":", $this->prefixedName)[1] ?? throw new \RuntimeException("Name '$prefixedName' is not prefixed"), "", $this->cmd->getAliases());
         $this->setDescription($this->cmd->getDescription());
-    }
-
-    /**
-     * @internal DO NOT CALL FUNCTION NO TAPI !!!!!!!!!!!!!!!!
-     */
-    public static function createForTesting(Command $cmd, bool $registerArgs, bool $subCommand) : self
-    {
-        $r = new ReflectionClass(self::class);
-        $n = $r->newInstanceWithoutConstructor();
-        $perm = $cmd->getPermission();
-        if ($perm !== null) {
-            $n->setPermission($perm);
-        } // TODO: ithink 100% require permission in pm4????
-        $n->cmd = $cmd;
-
-        if ($registerArgs || $subCommand) {
-            $args = [];
-            foreach (ArgConfigTest::ARG_FACTORY_TO_CLASS as $type => $class) {
-                $args[] = self::$argTypes[$type](new ArgConfig(
-                    type: $type,
-                    optional: true,
-                    name: $class,
-                    depends: [],
-                    other: []
-                )); // TODO: found bug !!! break my ph untt test
-            }
-        }
-
-        if ($registerArgs) {
-            /**
-             * @var BaseArgument[] $args
-             */
-            assert(isset($args));
-            foreach ($args as $i => $arg) {
-                $n->registerArgument($i, $arg);
-            }
-        }
-        if ($subCommand) {
-            $sub = new HyundaiSubCommand("aaa", new SubCommandConfig(
-                description: "bbb",
-                permission: "ccc",
-                aliases: ["ddd"],
-                args: [],
-                links: ["eee"]
-            ));
-            $n->registerSubCommand($sub);
-        }
-
-        return $n;
     }
 
     protected function prepare() : void
@@ -153,8 +109,14 @@ class HyundaiCommand extends BaseCommand
 
     public function logRegister() : void
     {
+        $log = "Registered '" . $this->prefixedName . "'";
+        if (isset(self::$testPlugin)) {
+            var_dump($log);
+            return;
+        }
+
         $this->simpleRegister();
-        MainClass::getInstance()->getLogger()->debug("Registered '" . $this->getLabel() . "'");
+        MainClass::getInstance()->getLogger()->debug($log);
     }
 
     /**
