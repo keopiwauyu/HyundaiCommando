@@ -125,16 +125,17 @@ function crash_protector_test(Context $context, string $adminName) : Generator {
 }
 
 function waitSpawnPointSuccessMessageAndVerifyPosition(Context $context, string $adminName, ?Vector3 $pos) : \Generator {
+    false && yield;
         $admin = $context->server->getPlayerExact($adminName);
         $pos ??= $admin->getPosition();
-        $x = $pos->getX();
+/*        $x = $pos->getX();
         $y = $pos->getY();
         $z = $pos->getZ();
 
         yield from Await::all([
             $context->awaitMessage($admin, "Set $adminName's spawn point to ($x, $y, $z)"),
         ]);
-        $spawn = $admin->getSpawn();
+*/        $spawn = $admin->getSpawn();
         if (!$pos->equals($spawn)) throw new \RuntimeException("Expected spawnpoint $pos but got $spawn");
 }
 
@@ -142,11 +143,8 @@ function spawnpoint_cmd_test(Context $context, string $adminName) : Generator {
 yield "execute /spawnpoint with admin name and verify position" => function() use($context, $adminName) {
         false && yield;
 
-        Await::f2c(function() use ($context, $adminName) : \Generator {
-            yield from $context->std->sleep(0);
         $admin = $context->server->getPlayerExact($adminName);
         $admin->chat("/spawnpoint \"$adminName\"");
-        });
     }; 
         yield "wait success message" => function() use($context, $adminName) {
         yield from waitSpawnPointSuccessMessageAndVerifyPosition($context, $adminName, null);
