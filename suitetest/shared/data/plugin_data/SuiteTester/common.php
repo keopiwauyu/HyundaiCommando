@@ -127,6 +127,9 @@ function crash_protector_test(Context $context, string $adminName) : Generator {
 function waitSpawnPointSuccessMessageAndVerifyPosition(Context $context, string $adminName, ?Vector3 $pos) : \Generator {
         $admin = $context->server->getPlayerExact($adminName);
         $pos ??= $admin->getPosition();
+        $x = $pos->getX();
+        $y = $pos->getY();
+        $z = $pos->getZ();
 
         yield from Await::all([
             $context->awaitMessage($admin, "Set $adminName's spawn point to ($x, $y, $z)"),
