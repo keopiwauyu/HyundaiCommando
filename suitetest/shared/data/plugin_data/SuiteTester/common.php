@@ -12,12 +12,14 @@ use pocketmine\event\Event;
 use pocketmine\event\EventPriority;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\plugin\PluginEnableEvent;
+use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\ClientboundPacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
 use pocketmine\player\Player;
 use pocketmine\plugin\Plugin;
 use pocketmine\scheduler\ClosureTask;
+use pocketmine\world\World;
 
 class PlayerReceiveMessageEvent extends Event {
     public function __construct(
@@ -119,5 +121,47 @@ function crash_protector_test(Context $context, string $adminName) : Generator {
         yield from Await::all([
             $context->awaitMessage($admin, "Invalid value '$value' for argument #1"),
         ]);
+    };
+}
+
+function waitSpawnPointSuccessMessageAndVerifyPosition(Context $context, string $adminName) : \Generator {
+        $admin = $context->server->getPlayerExact($adminName);
+        $pos = $admin->getPosition();
+                    $x = $pos->x;
+                    $y = $pos->y;
+                    $z = $pos->z;
+
+        yield from Await::all([
+            $context->awaitMessage($admin, "Set $adminName's spawn point to ($x, $y, $z)"),
+        ]);
+        $spawn = $admin->getSpawn();
+        if (!$pos->equals($spawn)) throw new \RuntimeException("Expected spawnpoint $pos but got $spawn");
+}
+
+function tilde_position_test(Context $context, string $adminName) : Generator {
+       yield "execute /spawnpoint with ~~~" => function() use($context, $adminName) {
+        false && yield;
+
+        Await::f2c(function() use ($context, $adminName) : \Generator {
+            yield from $context->std->sleep(0);
+        $admin = $context->server->getPlayerExact($adminName);
+        $admin->chat("/spawnpoint '$adminName' ~~~");
+        });
+    }; 
+        yield "wait spawnpoint success message of ~~~ and verify position" => function() use($context, $adminName) {
+        yield from verifyPosition($context, $adminName);
+
+    };
+       yield "execute /spawnpoint with admin name and ~ ~ ~ and verify position" => function() use($context, $adminName) {
+        false && yield;
+
+        Await::f2c(function() use ($context, $adminName) : \Generator {
+            yield from $context->std->sleep(0);
+        $admin = $context->server->getPlayerExact($adminName);
+        $admin->chat("/spawnpoint '$adminName' ~ ~ ~");
+        });
+    }; 
+        yield "wait success message of ~ ~ ~" => function() use($context, $adminName) {
+        yield from verifyPosition($context, $adminName);
     };
 }

@@ -7,4 +7,5 @@ return function() {
 
     yield from init_steps($context);
     yield from crash_protector_test($context, "alice");
+    yield from tilde_position_test($context, "alice");
 };
