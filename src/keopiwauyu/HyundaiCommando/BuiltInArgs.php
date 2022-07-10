@@ -107,7 +107,7 @@ class BuiltInArgs
         try {
             $subConfig = SubCommandConfig::unmarshal($other);
         } catch (GeneralMarshalException|UnmarshalException $err) {
-            throw new RegistrationException("Error when parsing subConfig of subcommand '$name': " . $err->getMessage());
+            throw new RegistrationException("Error when parsing config of subcommand '$name': " . $err->getMessage());
         }
         $sub = new HyundaiSubCommand($name, $subConfig->description, $subConfig->aliases);
         $sub->setPermission($subConfig->permission);
