@@ -101,9 +101,7 @@ class MainClass extends PluginBase
 
         try {
             $globalArgs = $this->loadGlobalArgs();
-        } catch (ErrorException $err) {
-            throw $err;
-        } catch (Exception $err) {
+        } catch (RegistrationException $err) {
             $this->suicide("Error when loading global arg " . $err->getMessage(), $err->getTrace());
             return;
         }

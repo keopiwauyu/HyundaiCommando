@@ -46,14 +46,14 @@ class ArgConfig
      * @param array<string, ArgConfig> $configs
      * @param string[] $orders
      * @param string[] $trace
-     * @throws Exception
+     * @throws RegistrationException
      */
     public static function arrangeLoadOrder(array $configs,array &$orders, string $name, array $trace) : void
     {
         $oldTrace = $trace;
         $trace[] = $name;
         if (in_array($name, $oldTrace, true)) {
-            throw new Exception("'$name': recursive depend ('" . implode("' => '", $trace) . "')");
+            throw new RegistrationException("'$name': recursive depend ('" . implode("' => '", $trace) . "')");
         }
         if (in_array($name, $orders, true)) {
             return;
