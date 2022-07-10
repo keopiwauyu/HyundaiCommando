@@ -165,7 +165,7 @@ yield "execute /spawnpoint with admin name, x y z and verify position" => functi
         $admin->chat("/spawnpoint \"$adminName\" $x $y $z");
         });
     }; 
-        yield "verify position: 831.721 689.777 64.19" => function() use($context, $adminName) {
+        yield "verify position: x y z" => function() use($context, $adminName) {
         yield from waitSpawnPointSuccessMessageAndVerifyPosition($context, $adminName, null);
     };
 }
