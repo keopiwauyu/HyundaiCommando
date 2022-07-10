@@ -39,14 +39,8 @@ class HyundaiCommand extends BaseCommand
     /**
      * @param array<BaseArgument|BaseSubCommand> $args
      */
-    public function __construct(private Command|HyundaiSubCommand $cmd, array $args, string $prefixedName)
+    public function __construct(private Command|HyundaiSubCommand $cmd, array $args, private string $prefixedName)
     {
-            $name = $cmd->getName();
-        if ($prefixedName instanceof self) {
-            $prefix = explode(":", $prefixedName->prefixedName)[0];
-            $this->prefixedName = "$prefix:$name";
-        } else $this->prefixedName = $prefixedName;
-
         $perm = $this->cmd->getPermission();
         if ($perm !== null) {
             $this->setPermission($perm);
@@ -75,7 +69,7 @@ class HyundaiCommand extends BaseCommand
     }
 
     public function getPrefixedName(string $name) : string {
-        return explode(":", $name) . ":$name";
+        return explode(":", $name)[0] . ":$name";
     }
 
     protected function prepare() : void
