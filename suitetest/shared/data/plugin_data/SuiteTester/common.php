@@ -139,19 +139,7 @@ function waitSpawnPointSuccessMessageAndVerifyPosition(Context $context, string 
 }
 
 function tilde_position_test(Context $context, string $adminName) : Generator {
-/*       yield "execute /spawnpoint with admin name and ~ ~ ~ and verify position" => function() use($context, $adminName) {
-        false && yield;
-
-        Await::f2c(function() use ($context, $adminName) : \Generator {
-            yield from $context->std->sleep(0);
-        $admin = $context->server->getPlayerExact($adminName);
-        $admin->chat("/spawnpoint '$adminName' ~ ~ ~");
-        });
-    }; 
-        yield "wait success message of ~ ~ ~" => function() use($context, $adminName) {
-        yield from waitSpawnPointSuccessMessageAndVerifyPosition($context, $adminName);
-    };
-*/       yield "execute /spawnpoint with ~~~" => function() use($context, $adminName) {
+/*       yield "execute /spawnpoint with ~~~" => function() use($context, $adminName) {
         false && yield;
 
         Await::f2c(function() use ($context, $adminName) : \Generator {
@@ -163,5 +151,17 @@ function tilde_position_test(Context $context, string $adminName) : Generator {
         yield "wait spawnpoint success message of ~~~ and verify position" => function() use($context, $adminName) {
         yield from waitSpawnPointSuccessMessageAndVerifyPosition($context, $adminName);
 
+    };
+*/       yield "execute /spawnpoint with admin name and ~ ~ ~ and verify position" => function() use($context, $adminName) {
+        false && yield;
+
+        Await::f2c(function() use ($context, $adminName) : \Generator {
+            yield from $context->std->sleep(0);
+        $admin = $context->server->getPlayerExact($adminName);
+        $admin->chat("/spawnpoint '$adminName' ~ ~ ~");
+        });
+    }; 
+        yield "wait success message of ~ ~ ~" => function() use($context, $adminName) {
+        yield from waitSpawnPointSuccessMessageAndVerifyPosition($context, $adminName);
     };
 }
