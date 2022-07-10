@@ -28,7 +28,11 @@ return [
 ];
 	}
 
-	private function setArgsInRandomIndexOrder(array $data, bool $stringIndex, bool $includeSubCommand) : array {
+	/**
+	 * @param mixed[] $data
+	 * @param string[] $depends
+	 */
+	private function setArgsInRandomIndexOrder(array $data, bool $stringIndex, bool $includeSubCommand, array $depends) : array {
 		$args = [
 			1 => ["type" => "Boolean"],
 			3 => ["type" => "Integer"],
@@ -57,8 +61,8 @@ return [
 		foreach ($args as &$arg) {
 			$arg["optional"] = true;
 			$arg["name"] = "고개 들면서 구호 외치면서";
-			$arg["depends"] = [];
-			$arg["other"] = $arg["type"] === "SubCommand" ? $this->setArgsInRandomIndexOrder($this->dataProvider(), false, false) : [];
+			$arg["depends"] = $depends;
+			$arg["other"] = $arg["type"] === "SubCommand" ? $this->setArgsInRandomIndexOrder($this->dataProvider(), false, false, []) : [];
 		}
 		$data["args"] = $args;
 
@@ -66,7 +70,7 @@ return [
 	}
 
 	public function testUnmarshal() : void {
-		$data = $this->setArgsInRandomIndexOrder($this->dataProvider(), false, true);
+		$data = $this->setArgsInRandomIndexOrder($this->dataProvider(), false, true, []);
 		$config = SubCommandConfig::unmarshal($data);
 		$this->assertSame($data, $config->marshal());
 	}
@@ -83,13 +87,20 @@ return [
 
 /*	public function testConfigToArgStringIndex() : void {
 		$this->expectException(RegistrationException::class);
-		HyundaiCommand::configToArg(ArgConfig::unmarshal($this->wrapWithArgConfigData($this->setArgsInRandomIndexOrder($this->dataProvider(), true, false))));
+		HyundaiCommand::configToArg(ArgConfig::unmarshal($this->wrapWithArgConfigData($this->setArgsInRandomIndexOrder($this->dataProvider(), true, false, []))));
 	}
 */	
+	public function testConfigToArgIncludeSubCommandUnknownDepend() : void {
+		$this->expectException(RegistrationException::class);
+		$config = ArgConfig::unmarshal($this->wrapWithArgConfigData($this->setArgsInRandomIndexOrder($this->dataProvider(), false, true, ["서서히 자유를 위해 큰힘을 모여"])));
+		HyundaiCommand::configToArg($config);
+	}
+
 	public function testConfigToArgIncludeSubCommand() : void {
 		$this->expectException(RegistrationException::class);
-		HyundaiCommand::configToArg(ArgConfig::unmarshal($this->wrapWithArgConfigData($this->setArgsInRandomIndexOrder($this->dataProvider(), false, true))));
+		HyundaiCommand::configToArg(ArgConfig::unmarshal($this->wrapWithArgConfigData($this->setArgsInRandomIndexOrder($this->dataProvider(), false, true, []))));
 	}
+
 
 	public function testConfigToArg() : void {
 		$sub = HyundaiCommand::configToArg(ArgConfig::unmarshal($this->wrapWithArgConfigData($this->dataProvider())));
@@ -99,7 +110,7 @@ return [
 	}
 
 	public function testConfigToArgIncludeArgs() : void {
-		$config = ArgConfig::unmarshal($this->wrapWithArgConfigData($this->setArgsInRandomIndexOrder($this->dataProvider(), false, false)));
+		$config = ArgConfig::unmarshal($this->wrapWithArgConfigData($this->setArgsInRandomIndexOrder($this->dataProvider(), false, false, [])));
 		$sub = HyundaiCommand::configToArg($config);
 
 		$this->assertSame(HyundaiSubCommand::class, $sub::class);

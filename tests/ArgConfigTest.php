@@ -75,7 +75,7 @@ return new ArgConfig(
 
 	public function testGetUnknownDepend() : void {
 		$this->expectException(RegistrationException::class);
-		$this->configProvider()->getDepend("kjsadahiua");
+		$this->configProvider()->getDepend("옆에서 몰랐던 친구 와 함 께");
 	}
 
 		public function testArrangeLoadOrderRecursive() : void {
