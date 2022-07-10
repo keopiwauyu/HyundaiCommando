@@ -69,8 +69,8 @@ class ArgConfig
      * @throws RegistrationException
      */
     public function getDependsFrom(array $args) : void {
-                                        foreach ($this->depends as $id => $depend) {
-$this->dependeds[$id] = $args[$id] ?? throw new RegistrationException("Unknown depend '$id'");
+                                        foreach ($this->depends as $depend) {
+$this->dependeds[$id] = $args[$id] ?? throw new RegistrationException("Unknown depend '$depend'");
                 }
     }
 }
