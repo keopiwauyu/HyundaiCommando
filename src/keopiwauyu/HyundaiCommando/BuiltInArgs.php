@@ -94,10 +94,8 @@ class BuiltInArgs
                 $arg = $config->getDepend($argConfig);
             } else {
                 try {
-                    foreach ($argConfig->depends as $id => $depend) {
-                        $argConfig->dependeds[$id] = $config->dependeds[$id] ?? throw new RegistrationException("Unknown global arg '$id'");
-                    }
-                    $arg = HyundaiCommand::configToArg($argConfig);
+                        $argConfig->getDependsFrom($config->dependeds);
+                $arg = HyundaiCommand::configToArg($argConfig);
                 } catch (RegistrationException $err) {
                     throw new RegistrationException("Error when parsing arg '$i' in subcommand: " . $err->getMessage());
                 }

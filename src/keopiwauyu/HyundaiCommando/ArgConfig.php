@@ -31,7 +31,7 @@ class ArgConfig
     /**
      * @var array<BaseArgument|BaseSubCommand>
      */
-    public array $dependeds;
+    public array $dependeds = [];
 
     /**
      * @throws RegistrationException
@@ -62,5 +62,15 @@ class ArgConfig
             self::arrangeLoadOrder($configs, $orders, $depend, $trace);
         }
         $orders[] = $name;
+    }
+
+    /**
+     * @param array<string, ArgConfig> $args
+     * @throws RegistrationException
+     */
+    public function getDependsFrom(array $args) : void {
+                                        foreach ($this->depends as $id => $depend) {
+$this->dependeds[$id] = $args[$id] ?? throw new RegistrationException("Unknown depend '$id'");
+                }
     }
 }

@@ -7,6 +7,7 @@ namespace keopiwauyu\HyundaiCommando;
 use CortexPE\Commando\args\BaseArgument;
 use CortexPE\Commando\BaseSubCommand;
 use CortexPE\Commando\PacketHooker;
+use ErrorException;
 use Exception;
 use Generator;
 use libMarshal\exception\GeneralMarshalException;
@@ -57,7 +58,7 @@ class MainClass extends PluginBase
         }
         $data = @yaml_parse_file($path);
         if (!is_array($data)) {
-            throw new Exception("yaml_parse_file($path) result is not array");
+            throw new Exception("yaml_parse_file($path) result not array");
         }
 
         $configs = [];
@@ -117,7 +118,7 @@ class MainClass extends PluginBase
             $errTemplate = "Error when parsing $path" . "$file: ";
             $data = yaml_parse_file($path . $file);
             if (!is_array($data)) {
-                $this->suicide("yaml_parse_file($path" . "$file) result is not array", Utils::currentTrace());
+                $this->suicide("yaml_parse_file($path" . "$file) result not array", Utils::currentTrace());
                 return;
             }
             foreach ($data as $k => $v) {
@@ -129,6 +130,7 @@ class MainClass extends PluginBase
                         return;
                     }
                     try {
+                        $config->getDependsFrom($globalArgs);
                         $arg = HyundaiCommand::configToArg($config);
                     } catch (RegistrationException $err) {
                         $this->suicide("Error when parsing arg '$k' in command '$prefixedName': " . $err->getMessage(), $err->getTrace());
@@ -137,7 +139,7 @@ class MainClass extends PluginBase
                 } else {
                     $arg = $globalArgs[$v] ?? null;
                     if ($arg === null) {
-                        $this->suicide("Unknown global arg '$v'", Utils::currentTrace());
+                        $this->suicide("'$v' not in 'depends'", Utils::currentTrace());
                         return;
                     }
                 }
@@ -147,7 +149,7 @@ class MainClass extends PluginBase
             $generators[] = HyundaiCommand::fromPrefixedName($prefixedName, $args);
         }
         foreach ($generators as $generator) {
-            Await::f2c(fn() : Generator => (yield from $generator)->logRegister());
+            Await::f2c(fn() : \Generator => (yield from $generator)->logRegister());
         }
 
         if (!PacketHooker::isRegistered()) {
