@@ -65,7 +65,7 @@ class ArgConfig
     }
 
     /**
-     * @param array<string, ArgConfig> $args
+     * @param array<BaseArgument|BaseSubCommand> $args
      * @throws RegistrationException
      */
     public function getDependsFrom(array $args) : void {
