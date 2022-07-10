@@ -7,7 +7,6 @@ namespace keopiwauyu\HyundaiCommando;
 use CortexPE\Commando\args\BaseArgument;
 use CortexPE\Commando\BaseSubCommand;
 use CortexPE\Commando\PacketHooker;
-use ErrorException;
 use Exception;
 use Generator;
 use libMarshal\exception\GeneralMarshalException;
@@ -58,7 +57,7 @@ class MainClass extends PluginBase
         }
         $data = @yaml_parse_file($path);
         if (!is_array($data)) {
-            throw new Exception("yaml_parse_file($path) result is not array");
+            throw new Exception("yaml_parse_file($path) result not array");
         }
 
         $configs = [];
@@ -101,9 +100,7 @@ class MainClass extends PluginBase
 
         try {
             $globalArgs = $this->loadGlobalArgs();
-        } catch (ErrorException $err) {
-            throw $err;
-        } catch (Exception $err) {
+        } catch (RegistrationException $err) {
             $this->suicide("Error when loading global arg " . $err->getMessage(), $err->getTrace());
             return;
         }
@@ -114,13 +111,13 @@ class MainClass extends PluginBase
         $files = scandir($path);
         $generators = [];
         foreach (array_diff($files !== false ? $files : [], [".", ".."]) as $file) {
-            $label = str_replace(" ", ":", trim($file, ".yml"));
+            $prefixedName = str_replace(" ", ":", trim($file, ".yml"));
             $args = [];
 
             $errTemplate = "Error when parsing $path" . "$file: ";
             $data = yaml_parse_file($path . $file);
             if (!is_array($data)) {
-                $this->suicide("yaml_parse_file($path" . "$file) result is not array", Utils::currentTrace());
+                $this->suicide("yaml_parse_file($path" . "$file) result not array", Utils::currentTrace());
                 return;
             }
             foreach ($data as $k => $v) {
@@ -132,28 +129,26 @@ class MainClass extends PluginBase
                         return;
                     }
                     try {
+                        $config->getDependsFrom($globalArgs);
                         $arg = HyundaiCommand::configToArg($config);
                     } catch (RegistrationException $err) {
-                        $this->suicide("Error when parsing arg '$k' in command '$label': " . $err->getMessage(), $err->getTrace());
+                        $this->suicide("Error when parsing arg '$k' in command '$prefixedName': " . $err->getMessage(), $err->getTrace());
                         return;
                     }
                 } else {
                     $arg = $globalArgs[$v] ?? null;
                     if ($arg === null) {
-                        $this->suicide("Unknown global arg '$v'", Utils::currentTrace());
+                        $this->suicide("'$v' not in 'depends'", Utils::currentTrace());
                         return;
                     }
                 }
                 $args[$k] = $arg;
             }
-            $this->getLogger()->debug("Queued command registration for '$label'");
-            $generators[] = (function() use ($label, $args) : Generator {
-                $cmd = yield from HyundaiCommand::fromLabel($label, $args);
-                $cmd->logRegister($label);
-            })();
+            $this->getLogger()->debug("Queued command registration for '$prefixedName'");
+            $generators[] = HyundaiCommand::fromPrefixedName($prefixedName, $args);
         }
         foreach ($generators as $generator) {
-            Await::g2c($generator); // @phpstan-ignore-line
+            Await::f2c(fn() : Generator => (yield from $generator)->logRegister());
         }
 
         if (!PacketHooker::isRegistered()) {

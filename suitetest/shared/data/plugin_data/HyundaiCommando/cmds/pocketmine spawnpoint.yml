@@ -1,0 +1,12 @@
+10:
+    type: RawString
+    optional: false
+    name: player
+    depends: []
+    other: []
+20:
+    type: Vector3
+    optional: true
+    name: x y z
+    depends: []
+    other: []

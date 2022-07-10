@@ -4,37 +4,41 @@ declare(strict_types=1);
 
 namespace keopiwauyu\HyundaiCommando;
 
+use CortexPE\Commando\args\BaseArgument;
 use CortexPE\Commando\BaseCommand;
 use CortexPE\Commando\BaseSubCommand;
-use CortexPE\Commando\IRunnable;
-use CortexPE\Commando\args\BaseArgument;
 use Generator;
-use ReflectionClass;
-use function array_filter;
-use function array_merge;
-use function array_unshift;
-use function array_values;
-use function assert;
-use function explode;
-use function is_bool;
-use function is_scalar;
-use function ksort;
-use pocketmine\Server;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\event\EventPriority;
 use pocketmine\event\player\PlayerLoginEvent;
 use pocketmine\math\Vector3;
+use pocketmine\plugin\Plugin;
+use pocketmine\Server;
+use RuntimeException;
+use Stringable;
+use function array_filter;
+use function array_values;
+use function assert;
+use function explode;
+use function get_debug_type;
+use function is_bool;
+use function is_scalar;
+use function ksort;
+use function var_dump;
 
 class HyundaiCommand extends BaseCommand
 {
+    /**
+     * @internal FOT TESTING !!!! ONLY !!!!
+     */
+    public static Plugin $testPlugin;
 
     /**
      * @param array<BaseArgument|BaseSubCommand> $args
      */
-    public function __construct(private Command|HyundaiSubCommand $cmd, array $args, ?string $name)
+    public function __construct(private Command|HyundaiSubCommand $cmd, array $args, private string $prefixedName)
     {
-        $map = Server::getInstance()->getCommandMap();
         $perm = $this->cmd->getPermission();
         if ($perm !== null) {
             $this->setPermission($perm);
@@ -58,59 +62,13 @@ class HyundaiCommand extends BaseCommand
             $this->registerArgument($i++, $arg);
         }
 
-        parent::__construct(MainClass::getInstance(), $name ?? $this->cmd->getName(), "", $this->cmd->getAliases());
+        parent::__construct(self::$testPlugin ?? MainClass::getInstance(), explode(":",     $this->prefixedName)[1] ?? throw new RuntimeException("Name '" . $this->prefixedName . "' is not prefixed"), "", $this->cmd->getAliases());
         $this->setDescription($this->cmd->getDescription());
     }
 
-    /**
-     * @internal DO NOT CALL FUNCTION NO TAPI !!!!!!!!!!!!!!!!
-     */
-    public static function createForTesting(Command $cmd, bool $registerArgs, bool $subCommand) : self
+    public function getPrefixedName(string $name) : string
     {
-        $r = new ReflectionClass(self::class);
-        $n = $r->newInstanceWithoutConstructor();
-        $perm = $cmd->getPermission();
-        if ($perm !== null) {
-            $n->setPermission($perm);
-        } // TODO: ithink 100% require permission in pm4????
-        $n->cmd = $cmd;
-
-        if ($registerArgs || $subCommand) {
-            $args = [];
-            foreach (ArgConfigTest::ARG_FACTORY_TO_CLASS as $type => $class) {
-                $args[] = self::$argTypes[$type](new ArgConfig(
-                    type: $type,
-                    optional: true,
-                    name: $class,
-                    depends: [],
-                    other: []
-                )); // TODO: found bug !!! break my ph untt test
-            }
-        }
-
-        if ($registerArgs) {
-            /**
-             * @var BaseArgument[] $args
-             */
-            assert(isset($args));
-            foreach ($args as $i => $arg) {
-                $n->registerArgument($i, $arg);
-            }
-        }
-        if ($subCommand) {
-            $sub = new HyundaiSubCommand("aaa", "bbb", [
-                "ccc",
-                "ddd"
-            ]);
-            if ($registerArgs) {
-                foreach ($args as $i => $arg) {
-                    $sub->registerArgument($i, $arg);
-                }
-            }
-            $n->registerSubCommand($sub);
-        }
-
-        return $n;
+        return explode(":", $this->prefixedName)[0] . ":$name";
     }
 
     protected function prepare() : void
@@ -124,43 +82,42 @@ class HyundaiCommand extends BaseCommand
     {
         $newArgs = [];
         foreach ($args as $arg) {
-            $newArgs = array_merge($newArgs, match ( true) {
-                is_bool($arg) => [$arg ? "true" : "false"], // TODO: on / off enum blah bla blah
+            try {
+                $newArgs = [...$newArgs, ...match (true) {
+                    is_bool($arg) => [$arg ? "true" : "false"], // TODO: on / off enum blah bla blah
                 $arg instanceof Vector3 => ($arg->getX() === $arg->getFloorX() && $arg->getY() === $arg->getFloorY() && $arg->getZ() === $arg->getFloorZ()) ? [(string)$arg->getFloorX(), (string)$arg->getFloorY(), (string)$arg->getFloorZ()] : [(string)$arg->getX(), (string)$arg->getY(), (string)$arg->getZ()],
-                is_scalar($arg) => [(string)$arg],
-                default => [$arg]
-            });
+                is_scalar($arg) || $arg instanceof Stringable => [(string)$arg],
+                default => throw new RuntimeException()
+                }];
+            } catch (\RuntimeException) {
+                MainClass::getInstance()->getLogger()->error("Commando provided unsupported arg type: " . get_debug_type($arg));
+            }
         }
         if ($this->cmd instanceof Command) {
-            $cmd = $this->cmd;
+            $this->cmd->execute($sender, $aliasUsed, $newArgs);
         } else {
-            $cmd = $this->cmd->getParent();
-            array_unshift($newArgs, $this->cmd->getName());
+            $this->cmd->onRun($sender, $aliasUsed, $args);
         }
-        /**
-         * @var string[] $newArgs
-         */
-        $cmd->execute($sender, $aliasUsed, $newArgs);
     }
 
-    public function getFallbackPrefix() : string
+    public function simpleRegister() : void
     {
-        $label = $this->cmd instanceof Command ? $this->cmd->getLabel() : $this->cmd->getParent()->getLabel();
-        return explode(":", $label)[0];
-    }
-
-    public function simpleRegister(string $fallbackPrefix) : void
-    {
-        $name = $this->getName();
-        $this->setLabel("$fallbackPrefix:$name");
         $map = Server::getInstance()->getCommandMap();
-        $map->register($fallbackPrefix, $this);
+        // if ($this->isRegistered($map)) throw new \RuntimeException("HyundaiCommand registered to one command map for more than once");
+
+        $map->register(explode(":", $this->prefixedName)[0], $this);
     }
 
-    public function logRegister(string $fallbackPrefix) : void
+    public function logRegister() : void
     {
-        $this->simpleRegister($fallbackPrefix);
-        MainClass::getInstance()->getLogger()->debug("Registered '" . $this->getLabel() . "'");
+        $log = "Registered '" . $this->prefixedName . "'";
+        if (isset(self::$testPlugin)) {
+            var_dump($log);
+            return;
+        }
+
+        $this->simpleRegister();
+        MainClass::getInstance()->getLogger()->debug($log);
     }
 
     /**
@@ -200,10 +157,10 @@ class HyundaiCommand extends BaseCommand
      * @param array<BaseArgument|BaseSubCommand> $args
      * @return Generator<mixed, mixed, mixed, HyundaiCommand>
      */
-    public static function fromLabel(string $label, array $args) : Generator
+    public static function fromPrefixedName(string $prefixedName, array $args) : Generator
     {
         $map = Server::getInstance()->getCommandMap();
-        while (($cmd = $map->getCommand($label)) === null) {
+        while (($cmd = $map->getCommand($prefixedName)) === null) {
             // TODO: Timeout
             yield from MainClass::getInstance()->std->awaitEvent(
                 PlayerLoginEvent::class,
@@ -216,6 +173,6 @@ class HyundaiCommand extends BaseCommand
         assert(isset($cmd));
         $map->unregister($cmd);
 
-        return new self($cmd, $args, null);
+        return new self($cmd, $args, $prefixedName);
     }
 }

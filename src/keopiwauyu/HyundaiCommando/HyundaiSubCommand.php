@@ -4,36 +4,57 @@ declare(strict_types=1);
 
 namespace keopiwauyu\HyundaiCommando;
 
+use CortexPE\Commando\BaseCommand;
 use CortexPE\Commando\BaseSubCommand;
-use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
-use RuntimeException;
 use function array_unshift;
+use function assert;
+use function get_debug_type;
+use function is_string;
 
 class HyundaiSubCommand extends BaseSubCommand
 {
-    public SubCommandConfig $config;
-    /**
-     * @var HyundaiCommand[]
-     */
-    public array $links = [];
-    private HyundaiCommand $hyundaiParent;
-
-    public function getParent() : HyundaiCommand
+    public function __construct(string $name, private SubCommandConfig $config)
     {
-        return $this->hyundaiParent;
+        parent::__construct($name, $this->config->description, $this->config->aliases);
+        $this->setPermission($this->config->permission);
     }
 
-    public function setParent(Command $hyundaiParent) : void
+    /**
+     * @throws RegistrationException
+     */
+    public function setParent(BaseCommand $parent) : void
     {
-        if (!$hyundaiParent instanceof HyundaiCommand) {
-            throw new RuntimeException("HyundaiSubCommand must have a HyundaiCommand parent");
+        $parented = isset($this->parent);
+        parent::setParent($parent);
+        if ($parented) {
+            return;
         }
-        $this->hyundaiParent = $hyundaiParent;
 
-        foreach ($this->links as $link)$link->logRegister($this->getParent()->getFallbackPrefix());
+        $links = $this->config->links;
+        if ($links !== [] && !$parent instanceof HyundaiCommand) {
+            throw new RegistrationException("Cannot use 'links' when subcommand is registered on cmd '" . $parent->getName() . "' which is a " . get_debug_type($parent));
+        }
+        assert($parent instanceof HyundaiCommand);
 
-        parent::setParent($hyundaiParent);
+        $argsss = $parent->getArgumentList();
+        $args = [];
+        foreach ($argsss as $argss) {
+            foreach ($argss as $arg) {
+                $args[] = $arg; // Commando very weird??? hmm
+            }
+        }
+        foreach ($args as $i => $arg) {
+            $this->registerArgument($i, $arg);
+        }
+
+        foreach ($links as $i => $link) {
+            if (!is_string($link)) {
+                throw new RegistrationException("Subcommand link $i is not a string'");
+            }
+            $cmd = new HyundaiCommand($this, $args, $parent->getPrefixedName($link));
+            $cmd->logRegister();
+        }
     }
 
     protected function prepare() : void
@@ -49,6 +70,6 @@ class HyundaiSubCommand extends BaseSubCommand
         /**
          * @var string[] $args phpstan levle 9 sooooooooo bad i us elelev 8 in my nextp lugin
          */
-        $this->getParent()->onRun($sender, $aliasUsed, $args);
+        $this->parent->onRun($sender, $aliasUsed, $args);
     }
 }

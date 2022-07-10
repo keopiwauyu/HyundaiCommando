@@ -6,7 +6,6 @@ namespace keopiwauyu\HyundaiCommando;
 
 use CortexPE\Commando\args\BaseArgument;
 use CortexPE\Commando\BaseSubCommand;
-use Exception;
 use libMarshal\attributes\Field;
 use libMarshal\MarshalTrait;
 use function implode;
@@ -32,7 +31,7 @@ class ArgConfig
     /**
      * @var array<BaseArgument|BaseSubCommand>
      */
-    public array $dependeds;
+    public array $dependeds = [];
 
     /**
      * @throws RegistrationException
@@ -46,14 +45,14 @@ class ArgConfig
      * @param array<string, ArgConfig> $configs
      * @param string[] $orders
      * @param string[] $trace
-     * @throws Exception
+     * @throws RegistrationException
      */
     public static function arrangeLoadOrder(array $configs,array &$orders, string $name, array $trace) : void
     {
         $oldTrace = $trace;
         $trace[] = $name;
         if (in_array($name, $oldTrace, true)) {
-            throw new Exception("'$name': recursive depend ('" . implode("' => '", $trace) . "')");
+            throw new RegistrationException("'$name': recursive depend ('" . implode("' => '", $trace) . "')");
         }
         if (in_array($name, $orders, true)) {
             return;
@@ -63,5 +62,16 @@ class ArgConfig
             self::arrangeLoadOrder($configs, $orders, $depend, $trace);
         }
         $orders[] = $name;
+    }
+
+    /**
+     * @param array<BaseArgument|BaseSubCommand> $args
+     * @throws RegistrationException
+     */
+    public function getDependsFrom(array $args) : void
+    {
+        foreach ($this->depends as $id => $depend) {
+            $this->dependeds[$id] = $args[$id] ?? throw new RegistrationException("Unknown depend '$depend' (forget adding to 'depends'?)");
+        }
     }
 }

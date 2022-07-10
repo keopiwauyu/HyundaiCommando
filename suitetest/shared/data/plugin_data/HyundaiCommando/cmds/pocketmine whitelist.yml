@@ -1,0 +1,71 @@
+10:
+    type: SubCommand
+    optional: false
+    name: "on"
+    depends: []
+    other: 
+        links: ["on", wl]
+        description: Turn on whitelist for the server
+        permission: pocketmine.command.spawnpoint
+        aliases:
+            - enable
+        args: []
+20:
+    type: SubCommand
+    optional: false
+    name: "off"
+    depends: []
+    other:
+        links: ["off", wll]
+        description: Turn off whitelist for the server
+        permission: pocketmine.command.spawnpoint
+        aliases:
+            - disable
+        args: []
+30:
+    type: SubCommand
+    optional: false
+    name: add
+    depends: []
+    other: 
+        links: []
+        description: Add player to whitelist
+        permission: pocketmine.command.spawnpoint
+        aliases:
+            - +
+        args:
+            10:
+                type: RawString
+                optional: false
+                name: player
+                depends: []
+                other: []
+40:
+    type: SubCommand
+    optional: false
+    name: remove
+    depends: []
+    other: 
+        links: []
+        description: Remove player from whitelist
+        permission: pocketmine.command.spawnpoint
+        aliases:
+            - "-"
+        args:
+            10:
+                type: RawString
+                optional: false
+                name: player
+                depends: []
+                other: []
+50:
+    type: SubCommand
+    optional: false
+    name: reload
+    depends: []
+    other:
+        description: Reload whitelist.yml in disk
+        permission: pocketmine.command.spawnpoint
+        aliases: []
+        links: []
+        args: []

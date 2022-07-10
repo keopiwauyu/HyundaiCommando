@@ -88,7 +88,7 @@ return new ArgConfig(
 			$two->depends = ["three", "one"];
 			$three->depends = ["one", "two"];
 
-		$this->expectException(\Exception::class);
+		$this->expectException(RegistrationException::class);
 		$orders = [];
 		foreach ($configs as $name => $config)ArgConfig::arrangeLoadOrder($configs, $orders, $name,[]);
 		}
