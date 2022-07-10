@@ -4,36 +4,43 @@ declare(strict_types=1);
 
 namespace keopiwauyu\HyundaiCommando;
 
+use CortexPE\Commando\BaseCommand;
 use CortexPE\Commando\BaseSubCommand;
-use pocketmine\command\Command;
-use pocketmine\command\CommandSender;
 use RuntimeException;
 use function array_unshift;
+use pocketmine\command\Command;
+use pocketmine\command\CommandSender;
 
 class HyundaiSubCommand extends BaseSubCommand
 {
-    public SubCommandConfig $config;
-    /**
-     * @var HyundaiCommand[]
-     */
-    public array $links = [];
-    private HyundaiCommand $hyundaiParent;
-
-    public function getParent() : HyundaiCommand
-    {
-        return $this->hyundaiParent;
+    public function __construct(string $name, private SubCommandConfig $config) {
+        parent::__construct($name, $this->config->description, $this->config->aliases);
+        $this->setPermission($this->config->permission);
     }
 
-    public function setParent(Command $hyundaiParent) : void
-    {
-        if (!$hyundaiParent instanceof HyundaiCommand) {
-            throw new RuntimeException("HyundaiSubCommand must have a HyundaiCommand parent");
+    /**
+     * @throws RegistrationException
+     */
+    public function setParent(BaseCommand $parent) : void {
+        $linked = isset($this->parent);
+        parent::setParent($parent);
+
+        $links = $this->config->links;
+        if ($linked || $links === []) return;
+        if (!$parent instanceof HyundaiCommand) {
+            throw new RegistrationException("Cannot use link when subcommand is registered on cmd '" . $parent->getName() . "' which is a " . get_debug_type($parent));
         }
-        $this->hyundaiParent = $hyundaiParent;
-
-        foreach ($this->links as $link)$link->logRegister($this->getParent()->getFallbackPrefix());
-
-        parent::setParent($hyundaiParent);
+            $argsss = $this->getArgumentList();
+            $args = [];
+            foreach ($argsss as $argss) {
+                foreach ($argss as $arg) {
+                    $args[] = $arg; // Commando very weird??? hmm
+                }
+            }
+        foreach ($links as $link) {
+            $cmd = new HyundaiCommand($this, $args, $parent);
+            $cmd->logRegister();
+        }
     }
 
     protected function prepare() : void
@@ -49,6 +56,6 @@ class HyundaiSubCommand extends BaseSubCommand
         /**
          * @var string[] $args phpstan levle 9 sooooooooo bad i us elelev 8 in my nextp lugin
          */
-        $this->getParent()->onRun($sender, $aliasUsed, $args);
+        $this->parent->onRun($sender, $aliasUsed, $args);
     }
 }
