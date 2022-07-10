@@ -4,28 +4,28 @@ declare(strict_types=1);
 
 namespace keopiwauyu\HyundaiCommando;
 
+use CortexPE\Commando\args\BaseArgument;
 use CortexPE\Commando\BaseCommand;
 use CortexPE\Commando\BaseSubCommand;
-use CortexPE\Commando\IRunnable;
-use CortexPE\Commando\args\BaseArgument;
 use Generator;
-use ReflectionClass;
-use function array_filter;
-use function array_merge;
-use function array_unshift;
-use function array_values;
-use function assert;
-use function explode;
-use function is_bool;
-use function is_scalar;
-use function ksort;
-use pocketmine\Server;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\event\EventPriority;
 use pocketmine\event\player\PlayerLoginEvent;
 use pocketmine\math\Vector3;
 use pocketmine\plugin\Plugin;
+use pocketmine\Server;
+use RuntimeException;
+use Stringable;
+use function array_filter;
+use function array_values;
+use function assert;
+use function explode;
+use function get_debug_type;
+use function is_bool;
+use function is_scalar;
+use function ksort;
+use function var_dump;
 
 class HyundaiCommand extends BaseCommand
 {
@@ -62,11 +62,12 @@ class HyundaiCommand extends BaseCommand
             $this->registerArgument($i++, $arg);
         }
 
-        parent::__construct(self::$testPlugin ?? MainClass::getInstance(), explode(":",     $this->prefixedName)[1] ?? throw new \RuntimeException("Name '" . $this->prefixedName . "' is not prefixed"), "", $this->cmd->getAliases());
+        parent::__construct(self::$testPlugin ?? MainClass::getInstance(), explode(":",     $this->prefixedName)[1] ?? throw new RuntimeException("Name '" . $this->prefixedName . "' is not prefixed"), "", $this->cmd->getAliases());
         $this->setDescription($this->cmd->getDescription());
     }
 
-    public function getPrefixedName(string $name) : string {
+    public function getPrefixedName(string $name) : string
+    {
         return explode(":", $this->prefixedName)[0] . ":$name";
     }
 
@@ -82,18 +83,18 @@ class HyundaiCommand extends BaseCommand
         $newArgs = [];
         foreach ($args as $arg) {
             try {
-            $newArgs = [...$newArgs, ...match (true) {
-                is_bool($arg) => [$arg ? "true" : "false"], // TODO: on / off enum blah bla blah
+                $newArgs = [...$newArgs, ...match (true) {
+                    is_bool($arg) => [$arg ? "true" : "false"], // TODO: on / off enum blah bla blah
                 $arg instanceof Vector3 => ($arg->getX() === $arg->getFloorX() && $arg->getY() === $arg->getFloorY() && $arg->getZ() === $arg->getFloorZ()) ? [(string)$arg->getFloorX(), (string)$arg->getFloorY(), (string)$arg->getFloorZ()] : [(string)$arg->getX(), (string)$arg->getY(), (string)$arg->getZ()],
-                is_scalar($arg) || $arg instanceof \Stringable => [(string)$arg],
-                default => throw new \RuntimeException()
-            }];
-        } catch (\RuntimeException) {
-            MainClass::getInstance()->getLogger()->error("Commando provided unsupported arg type: " . get_debug_type($arg));
-        }
+                is_scalar($arg) || $arg instanceof Stringable => [(string)$arg],
+                default => throw new RuntimeException()
+                }];
+            } catch (\RuntimeException) {
+                MainClass::getInstance()->getLogger()->error("Commando provided unsupported arg type: " . get_debug_type($arg));
+            }
         }
         if ($this->cmd instanceof Command) {
-        $this->cmd->execute($sender, $aliasUsed, $newArgs);
+            $this->cmd->execute($sender, $aliasUsed, $newArgs);
         } else {
             $this->cmd->onRun($sender, $aliasUsed, $args);
         }
