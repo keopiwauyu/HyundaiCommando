@@ -80,7 +80,7 @@ class BuiltInArgs
     {
         $sub = self::subCommandNoLink($config);
         if (!$sub instanceof HyundaiSubCommand) {
-            throw new RegistrationException("Cannot get subcommand config from " . $sub::class);
+            throw new \RuntimeException("Cannot get subcommand config from " . $sub::class);
         }
         $config = $sub->config;
         if ($config->link) {
@@ -107,7 +107,7 @@ class BuiltInArgs
         try {
             $subConfig = SubCommandConfig::unmarshal($other);
         } catch (GeneralMarshalException|UnmarshalException $err) {
-            throw new RegistrationException("Error when parsing config of subcommand '$name': " . $err->getMessage());
+            throw new RegistrationException("Error when parsing subcommand config: " . $err->getMessage());
         }
         $sub = new HyundaiSubCommand($name, $subConfig->description, $subConfig->aliases);
         $sub->setPermission($subConfig->permission);
@@ -119,15 +119,22 @@ class BuiltInArgs
             if (is_string($argConfig)) {
                 $arg = $config->getDepend($argConfig);
             } else {
+                try {
+                foreach ($argConfig->depends as $id => $depend) {
+$argConfig->dependeds[$id] = $config->dependeds[$id] ?? throw new RegistrationException("Unknown global arg '$id'");
+                }
                 $arg = HyundaiCommand::configToArg($argConfig);
+                } catch (RegistrationException $err) {
+                    throw new RegistrationException("Error when parsing arg '$i' in subcommand: " . $err->getMessage());
+                }
             }
             if ($arg instanceof BaseSubCommand) {
-                throw new RegistrationException("Subcommand '$name' cannot contain another subcommand");
+                throw new RegistrationException("Subcommand cannot contain another subcommand");
             }
             try {
                 $sub->registerArgument($i, $arg);
             } catch (ArgumentOrderException $err) {
-                throw new RegistrationException("Bad argument order for subcommand '$name': " . $err->getMessage());
+                throw new RegistrationException("Bad argument order for subcommand" . $err->getMessage());
             }
         }
 
