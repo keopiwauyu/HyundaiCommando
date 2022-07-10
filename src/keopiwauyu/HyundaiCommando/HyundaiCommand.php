@@ -62,7 +62,7 @@ class HyundaiCommand extends BaseCommand
             $this->registerArgument($i++, $arg);
         }
 
-        parent::__construct(self::$testPlugin ?? MainClass::getInstance(), $name, "", $this->cmd->getAliases());
+        parent::__construct(self::$testPlugin ?? MainClass::getInstance(), explode(":",     $this->prefixedName)[1] ?? throw new \RuntimeException("Name '" . $this->prefixedName . "' is not prefixed"), "", $this->cmd->getAliases());
         $this->setDescription($this->cmd->getDescription());
     }
 
