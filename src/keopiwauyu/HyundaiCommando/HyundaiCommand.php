@@ -39,7 +39,7 @@ class HyundaiCommand extends BaseCommand
     /**
      * @param array<BaseArgument|BaseSubCommand> $args
      */
-    public function __construct(private Command|HyundaiSubCommand $cmd, array $args, string|self $prefixedName)
+    public function __construct(private Command|HyundaiSubCommand $cmd, array $args, string $prefixedName)
     {
             $name = $cmd->getName();
         if ($prefixedName instanceof self) {
@@ -72,6 +72,10 @@ class HyundaiCommand extends BaseCommand
 
         parent::__construct(self::$testPlugin ?? MainClass::getInstance(), $name, "", $this->cmd->getAliases());
         $this->setDescription($this->cmd->getDescription());
+    }
+
+    public function getPrefixedName(string $name) : string {
+        return explode(":", $name) . ":$name";
     }
 
     protected function prepare() : void

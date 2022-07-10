@@ -42,7 +42,7 @@ class HyundaiSubCommand extends BaseSubCommand
             foreach ($args as $i => $arg) $this->registerArgument($i, $arg);
 
         foreach ($links as $link) {
-            $cmd = new HyundaiCommand($this, $args, $parent);
+            $cmd = new HyundaiCommand($this, $args, $parent->getPrefixedName($link));
             $cmd->logRegister();
         }
     }
