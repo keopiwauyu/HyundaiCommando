@@ -144,21 +144,26 @@ yield "execute /spawnpoint with admin name and verify position" => function() us
         false && yield;
 
         $admin = $context->server->getPlayerExact($adminName);
+        $admin->setSpawn(new Vector3(831.721, 689.777, 64.19));
         $admin->chat("/spawnpoint \"$adminName\"");
     }; 
-        yield "wait success message" => function() use($context, $adminName) {
+        yield "verify position" => function() use($context, $adminName) {
         yield from waitSpawnPointSuccessMessageAndVerifyPosition($context, $adminName, null);
     };
-yield "execute /spawnpoint with admin name, 831.721 689.777 64.19 and verify position" => function() use($context, $adminName) {
+yield "execute /spawnpoint with admin name, x y z and verify position" => function() use($context, $adminName) {
         false && yield;
 
         Await::f2c(function() use ($context, $adminName) : \Generator {
             yield from $context->std->sleep(0);
         $admin = $context->server->getPlayerExact($adminName);
-        $admin->chat("/spawnpoint \"$adminName\" 831.721 689.777 64.19");
+        $pos = $admin->getPosition();
+        $x = $pos->x;
+        $x = $pos->y;
+        $x = $pos->z;
+        $admin->chat("/spawnpoint \"$adminName\" $x $y $z");
         });
     }; 
-        yield "wait success message of 831.721 689.777 64.19" => function() use($context, $adminName) {
-        yield from waitSpawnPointSuccessMessageAndVerifyPosition($context, $adminName, new Vector3(831.721, 689.777, 64.19));
+        yield "verify position: 831.721 689.777 64.19" => function() use($context, $adminName) {
+        yield from waitSpawnPointSuccessMessageAndVerifyPosition($context, $adminName, null);
     };
 }
