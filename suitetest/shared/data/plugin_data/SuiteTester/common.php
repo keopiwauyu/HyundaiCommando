@@ -157,11 +157,11 @@ yield "execute /spawnpoint with admin name, x y z and verify position" => functi
             yield from $context->std->sleep(0);
         $admin = $context->server->getPlayerExact($adminName);
         $admin->setSpawn(new Vector3(831.721, 689.777, 64.19));
-        
+
         $pos = $admin->getPosition();
         $x = $pos->x;
-        $x = $pos->y;
-        $x = $pos->z;
+        $y = $pos->y;
+        $z = $pos->z;
         $admin->chat("/spawnpoint \"$adminName\" $x $y $z");
         });
     }; 
