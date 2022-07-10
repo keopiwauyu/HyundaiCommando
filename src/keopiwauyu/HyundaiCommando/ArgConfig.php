@@ -30,7 +30,7 @@ class ArgConfig
     }
 
     /**
-     * @var array<string, BaseArgument|BaseSubCommand>
+     * @var array<BaseArgument|BaseSubCommand>
      */
     public array $dependeds;
 
