@@ -4,16 +4,11 @@ declare(strict_types=1);
 
 namespace keopiwauyu\HyundaiCommando;
 
-use CortexPE\Commando\args\BaseArgument;
 use CortexPE\Commando\BaseCommand;
 use CortexPE\Commando\BaseSubCommand;
+use CortexPE\Commando\IRunnable;
+use CortexPE\Commando\args\BaseArgument;
 use Generator;
-use pocketmine\command\Command;
-use pocketmine\command\CommandSender;
-use pocketmine\event\EventPriority;
-use pocketmine\event\player\PlayerLoginEvent;
-use pocketmine\math\Vector3;
-use pocketmine\Server;
 use ReflectionClass;
 use function array_filter;
 use function array_merge;
@@ -24,6 +19,12 @@ use function explode;
 use function is_bool;
 use function is_scalar;
 use function ksort;
+use pocketmine\Server;
+use pocketmine\command\Command;
+use pocketmine\command\CommandSender;
+use pocketmine\event\EventPriority;
+use pocketmine\event\player\PlayerLoginEvent;
+use pocketmine\math\Vector3;
 
 class HyundaiCommand extends BaseCommand
 {
@@ -31,7 +32,7 @@ class HyundaiCommand extends BaseCommand
     /**
      * @param array<BaseArgument|BaseSubCommand> $args
      */
-    public function __construct(private Command|HyundaiSubCommand $cmd, array $args)
+    public function __construct(private Command|HyundaiSubCommand $cmd, array $args, ?string $name)
     {
         $map = Server::getInstance()->getCommandMap();
         $perm = $this->cmd->getPermission();
@@ -57,9 +58,8 @@ class HyundaiCommand extends BaseCommand
             $this->registerArgument($i++, $arg);
         }
 
-        $d = $this->cmd->getDescription();
-        parent::__construct(MainClass::getInstance(), $this->cmd->getName(), "", $this->cmd->getAliases());
-        $this->setDescription($d);
+        parent::__construct(MainClass::getInstance(), $name ?? $this->cmd->getName(), "", $this->cmd->getAliases());
+        $this->setDescription($this->cmd->getDescription());
     }
 
     /**
@@ -216,6 +216,6 @@ class HyundaiCommand extends BaseCommand
         assert(isset($cmd));
         $map->unregister($cmd);
 
-        return new self($cmd, $args);
+        return new self($cmd, $args, null);
     }
 }

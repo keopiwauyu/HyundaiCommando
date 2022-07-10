@@ -83,7 +83,8 @@ class BuiltInArgs
             throw new \RuntimeException("Cannot get subcommand config from " . $sub::class);
         }
         $config = $sub->config;
-        if ($config->link) {
+
+        if ($config->links === []) return $sub;
             $argsss = $sub->getArgumentList();
             $args = [];
             foreach ($argsss as $argss) {
@@ -91,8 +92,10 @@ class BuiltInArgs
                     $args[] = $arg; // Commando very weird??? hmm
                 }
             }
-            $sub->link = new HyundaiCommand($sub, $args);
-        }
+            $sub->links = array_map(
+                fn(string $link) => new HyundaiCommand($sub, $args, $link),
+                $config->links
+            );
 
         return $sub;
     }
