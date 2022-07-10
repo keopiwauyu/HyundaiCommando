@@ -30,6 +30,7 @@ class HyundaiSubCommand extends BaseSubCommand
                 if ($links !== [] && !$parent instanceof HyundaiCommand) {
             throw new RegistrationException("Cannot use 'links' when subcommand is registered on cmd '" . $parent->getName() . "' which is a " . get_debug_type($parent));
         }
+            assert($parent instanceof HyundaiCommand);
 
                     $argsss = $parent->getArgumentList();
             $args = [];
