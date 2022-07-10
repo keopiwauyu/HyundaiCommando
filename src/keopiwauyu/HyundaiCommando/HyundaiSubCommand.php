@@ -43,7 +43,7 @@ class HyundaiSubCommand extends BaseSubCommand
 
         foreach ($links as $link) {
             if (!is_string($link)) {
-            throw new RegistrationException("Subcommand link '$link' is not a string'")
+            throw new RegistrationException("Subcommand link '$link' is not a string'");
             }
             $cmd = new HyundaiCommand($this, $args, $parent->getPrefixedName($link));
             $cmd->logRegister();
