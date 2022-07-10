@@ -147,6 +147,7 @@ class MainClass extends PluginBase
             $this->getLogger()->debug("Queued command registration for '$prefixedName'");
             $generators[] = HyundaiCommand::fromPrefixedName($prefixedName, $args);
         }
+        var_dump(count($generators));
         foreach ($generators as $generator) {
             Await::f2c(fn() : \Generator => (yield from $generator)->logRegister());
         }
