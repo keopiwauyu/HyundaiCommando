@@ -149,7 +149,7 @@ function tilde_position_test(Context $context, string $adminName) : Generator {
         });
     }; 
         yield "wait spawnpoint success message of ~~~ and verify position" => function() use($context, $adminName) {
-        yield from verifyPosition($context, $adminName);
+        yield from waitSpawnPointSuccessMessageAndVerifyPosition($context, $adminName);
 
     };
        yield "execute /spawnpoint with admin name and ~ ~ ~ and verify position" => function() use($context, $adminName) {
@@ -162,6 +162,6 @@ function tilde_position_test(Context $context, string $adminName) : Generator {
         });
     }; 
         yield "wait success message of ~ ~ ~" => function() use($context, $adminName) {
-        yield from verifyPosition($context, $adminName);
+        yield from waitSpawnPointSuccessMessageAndVerifyPosition($context, $adminName);
     };
 }
