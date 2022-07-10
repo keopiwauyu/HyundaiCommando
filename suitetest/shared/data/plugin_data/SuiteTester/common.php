@@ -145,7 +145,7 @@ yield "execute /spawnpoint with admin name and verify position" => function() us
         Await::f2c(function() use ($context, $adminName) : \Generator {
             yield from $context->std->sleep(0);
         $admin = $context->server->getPlayerExact($adminName);
-        $admin->chat("/spawnpoint '$adminName'");
+        $admin->chat("/spawnpoint \"$adminName\"");
         });
     }; 
         yield "wait success message" => function() use($context, $adminName) {
@@ -157,7 +157,7 @@ yield "execute /spawnpoint with admin name, 831.721 689.777 64.19 and verify pos
         Await::f2c(function() use ($context, $adminName) : \Generator {
             yield from $context->std->sleep(0);
         $admin = $context->server->getPlayerExact($adminName);
-        $admin->chat("/spawnpoint '$adminName' 831.721 689.777 64.19");
+        $admin->chat("/spawnpoint \"$adminName\" 831.721 689.777 64.19");
         });
     }; 
         yield "wait success message" => function() use($context, $adminName) {
