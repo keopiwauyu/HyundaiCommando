@@ -29,8 +29,6 @@ use pocketmine\plugin\Plugin;
 
 class HyundaiCommand extends BaseCommand
 {
-    private string $prefixedName;
-
     /**
      * @internal FOT TESTING !!!! ONLY !!!!
      */
