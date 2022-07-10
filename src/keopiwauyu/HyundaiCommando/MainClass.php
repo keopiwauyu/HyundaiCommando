@@ -117,7 +117,7 @@ class MainClass extends PluginBase
             $label = str_replace(" ", ":", trim($file, ".yml"));
             $args = [];
 
-            $errTemplate = "Error when parsing $path: ";
+            $errTemplate = "Error when parsing $path" . "$file: ";
             $data = yaml_parse_file($path . $file);
             if (!is_array($data)) {
                 $this->suicide("yaml_parse_file($path" . "$file) result is not array", Utils::currentTrace());
@@ -134,7 +134,7 @@ class MainClass extends PluginBase
                     try {
                         $arg = HyundaiCommand::configToArg($config);
                     } catch (RegistrationException $err) {
-                        $this->suicide("Error when parsing argument $k in command $label: " . $err->getMessage(), $err->getTrace());
+                        $this->suicide("Error when parsing argument '$k' in command '$label' (or one of its subcommand): " . $err->getMessage(), $err->getTrace());
                         return;
                     }
                 } else {
