@@ -37,7 +37,7 @@ class HyundaiCommand extends BaseCommand
     /**
      * @param array<BaseArgument|BaseSubCommand> $args
      */
-    public function __construct(private Command|HyundaiSubCommand $cmd, array $args, private string $fbp)
+    public function __construct(private Command|HyundaiSubCommand $cmd, array $args, private string $prefixedName)
     {
         $perm = $this->cmd->getPermission();
         if ($perm !== null) {
@@ -62,12 +62,12 @@ class HyundaiCommand extends BaseCommand
             $this->registerArgument($i++, $arg);
         }
 
-        parent::__construct(self::$testPlugin ?? MainClass::getInstance(), $cmd->getName(), "", $this->cmd->getAliases());
+        parent::__construct(self::$testPlugin ?? MainClass::getInstance(), $name, "", $this->cmd->getAliases());
         $this->setDescription($this->cmd->getDescription());
     }
 
     public function getPrefixedName(string $name) : string {
-        return $this->fbp . ":$name";
+        return explode(":", $name)[0] . ":$name";
     }
 
     protected function prepare() : void
@@ -104,12 +104,12 @@ class HyundaiCommand extends BaseCommand
         $map = Server::getInstance()->getCommandMap();
         // if ($this->isRegistered($map)) throw new \RuntimeException("HyundaiCommand registered to one command map for more than once");
 
-        $map->register($this->fbp, $this);
+        $map->register(explode(":", $this->prefixedName)[0], $this);
     }
 
     public function logRegister() : void
     {
-        $log = "Registered '" . $this->fbp . ":" . $this->getName() . "'";
+        $log = "Registered '" . $this->prefixedName . "'";
         if (isset(self::$testPlugin)) {
             var_dump($log);
             return;
@@ -172,7 +172,6 @@ class HyundaiCommand extends BaseCommand
         assert(isset($cmd));
         $map->unregister($cmd);
 
-        $fbp = explode(":", $prefixedName)[0];
-        return new self($cmd, $args, $fbp);
+        return new self($cmd, $args, $prefixedName);
     }
 }
