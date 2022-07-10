@@ -41,7 +41,11 @@ class HyundaiCommand extends BaseCommand
      */
     public function __construct(private Command|HyundaiSubCommand $cmd, array $args, string|self $prefixedName)
     {
-        $this->prefixedName = $prefixedName instanceof self ? $prefixedName->prefixedName : $prefixedName;
+            $name = $cmd->getName();
+        if ($prefixedName instanceof self) {
+            $prefix = explode(":", $prefixedName->prefixedName)[0];
+            $this->prefixedName = "$prefix:$name";
+        } else $this->prefixedName = $prefixedName;
 
         $perm = $this->cmd->getPermission();
         if ($perm !== null) {
@@ -66,7 +70,7 @@ class HyundaiCommand extends BaseCommand
             $this->registerArgument($i++, $arg);
         }
 
-        parent::__construct(self::$testPlugin ?? MainClass::getInstance(), explode(":", $this->prefixedName)[1] ?? throw new \RuntimeException("Name '$prefixedName' is not prefixed"), "", $this->cmd->getAliases());
+        parent::__construct(self::$testPlugin ?? MainClass::getInstance(), $name, "", $this->cmd->getAliases());
         $this->setDescription($this->cmd->getDescription());
     }
 
