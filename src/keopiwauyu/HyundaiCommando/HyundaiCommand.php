@@ -67,7 +67,7 @@ class HyundaiCommand extends BaseCommand
     }
 
     public function getPrefixedName(string $name) : string {
-        return explode(":", $name)[0] . ":$name";
+        return explode(":", $this->prefixedName)[0] . ":$name";
     }
 
     protected function prepare() : void
